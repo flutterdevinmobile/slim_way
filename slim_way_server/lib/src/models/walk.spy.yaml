@@ -1,0 +1,8 @@
+class: Walk
+table: walks
+fields:
+  user: User?, relation
+  steps: int
+  distanceKm: double
+  calories: double
+  createdAt: DateTime

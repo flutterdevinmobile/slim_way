@@ -1,0 +1,18 @@
+class: User
+table: users
+fields:
+  userInfoId: int?, relation(parent=serverpod_user_info)
+  name: String
+  age: int
+  gender: String
+  height: int
+  currentWeight: double
+  targetWeight: double
+  photoUrl: String?
+  createdAt: DateTime
+  updatedAt: DateTime
+  waterGlassSize: int?
+indexes:
+  user_info_id_idx:
+    fields: userInfoId
+    unique: true

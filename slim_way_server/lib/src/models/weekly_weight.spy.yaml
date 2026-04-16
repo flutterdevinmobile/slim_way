@@ -1,0 +1,7 @@
+class: WeeklyWeight
+table: weekly_weight
+fields:
+  user: User?, relation
+  weekStart: DateTime
+  weight: double
+  createdAt: DateTime

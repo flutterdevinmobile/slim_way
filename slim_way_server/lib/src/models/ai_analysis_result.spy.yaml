@@ -1,0 +1,9 @@
+class: AiAnalysisResult
+fields:
+  nameUz: String?
+  nameEn: String?
+  nameRu: String?
+  calories: double
+  protein: double?
+  fat: double?
+  carbs: double?

@@ -1,0 +1,11 @@
+class: Food
+table: foods
+fields:
+  user: User?, relation
+  name: String
+  calories: double
+  photoUrl: String?
+  protein: double?
+  fat: double?
+  carbs: double?
+  createdAt: DateTime

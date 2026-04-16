@@ -1,0 +1,13 @@
+class: DailyLog
+table: daily_logs
+fields:
+  user: User?, relation
+  date: DateTime
+  foodCal: double
+  protein: double?
+  fat: double?
+  carbs: double?
+  waterMl: int?
+  walkCal: double
+  netCal: double
+  createdAt: DateTime

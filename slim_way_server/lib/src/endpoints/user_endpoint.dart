@@ -1,0 +1,85 @@
+import 'package:serverpod/serverpod.dart';
+import 'package:serverpod_auth_server/serverpod_auth_server.dart';
+import '../generated/protocol.dart';
+
+class UserEndpoint extends Endpoint {
+  Future<User> createUser(Session session, User user) async {
+    final authInfo = session.authenticated;
+    if (authInfo == null) {
+      throw Exception('Unauthenticated: Please log in again.');
+    }
+
+    final userId = authInfo.userId;
+    print('SERVER createUser: userId=$userId, name=${user.name}');
+
+    // Set mandatory fields
+    user.createdAt = DateTime.now();
+    user.updatedAt = DateTime.now();
+    user.userInfoId = userId;
+
+    // Check for existing profile
+    final existingUser = await User.db.findFirstRow(
+      session,
+      where: (t) => t.userInfoId.equals(userId),
+    );
+
+    if (existingUser != null) {
+      print('SERVER createUser: Profile already exists for userId=$userId. Returning existing.');
+      return existingUser;
+    }
+
+    // Cleaned up for production stability
+    return await User.db.insertRow(session, user);
+  }
+
+  Future<User?> getUser(Session session, int id) async {
+    return await User.db.findById(session, id);
+  }
+
+  Future<User?> getUserByAuthId(Session session, int authId) async {
+    session.log('DEBUG: getUserByAuthId called for authId: $authId', level: LogLevel.debug);
+    
+    try {
+      final user = await User.db.findFirstRow(
+        session,
+        where: (t) => t.userInfoId.equals(authId),
+      );
+
+      if (user == null) {
+        session.log('DEBUG: No profile found in "users" table for serverpod_user_info.id: $authId', level: LogLevel.info);
+        // Automatically create a default profile
+        final userInfo = await Users.findUserByUserId(session, authId);
+        final newUser = User(
+          userInfoId: authId,
+          name: userInfo?.userName ?? userInfo?.email?.split('@').first ?? 'User $authId',
+          age: 25,
+          gender: 'Not specified',
+          height: 170,
+          currentWeight: 70.0,
+          targetWeight: 65.0,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+        final insertedUser = await User.db.insertRow(session, newUser);
+        session.log('DEBUG: Auto-created default profile for authId: $authId', level: LogLevel.info);
+        return insertedUser;
+      } else {
+        session.log('DEBUG: Found profile for user: ${user.name} (ID: ${user.id})', level: LogLevel.debug);
+      }
+      return user;
+    } catch (e, stack) {
+      session.log('ERROR: Database exception in getUserByAuthId: $e', level: LogLevel.error, stackTrace: stack);
+      return null;
+    }
+  }
+
+  Future<User> updateUser(Session session, User user) async {
+    final authInfo = session.authenticated;
+    if (authInfo == null) {
+      throw Exception('Unauthenticated');
+    }
+
+    user.updatedAt = DateTime.now();
+    return await User.db.updateRow(session, user);
+  }
+}

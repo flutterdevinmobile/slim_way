@@ -1,0 +1,42 @@
+emailIdp:
+  - login:
+  - startRegistration:
+  - verifyRegistrationCode:
+  - finishRegistration:
+  - startPasswordReset:
+  - verifyPasswordResetCode:
+  - finishPasswordReset:
+jwtRefresh:
+  - refreshAccessToken:
+ai:
+  - analyzeFoodImage:
+  - chatWithAi:
+food:
+  - addFood:
+  - getFoodLogs:
+  - getFoodHistory:
+  - deleteFood:
+googleAuth:
+  - signInWithGoogle:
+  - signInWithAccessToken:
+stats:
+  - getDailySummary:
+  - getHistory:
+user:
+  - createUser:
+  - getUser:
+  - getUserByAuthId:
+  - updateUser:
+walk:
+  - addWalk:
+  - syncSteps:
+  - getWalkLogs:
+  - getWalkHistory:
+water:
+  - addWater:
+  - updateWaterGlassSize:
+weeklyWeight:
+  - addWeight:
+  - getWeightHistory:
+greeting:
+  - hello:

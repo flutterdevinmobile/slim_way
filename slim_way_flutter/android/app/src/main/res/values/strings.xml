@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SlimWay</string>
+    <!-- Google Sign-In Android OAuth Client ID -->
+    <string name="default_web_client_id">437511136009-67e4reqcnaabdapp3t9igg961gj43ljn.apps.googleusercontent.com</string>
+</resources>
