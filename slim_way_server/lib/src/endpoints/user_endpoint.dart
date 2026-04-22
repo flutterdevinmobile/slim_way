@@ -60,9 +60,21 @@ class UserEndpoint extends Endpoint {
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
         );
-        final insertedUser = await User.db.insertRow(session, newUser);
-        session.log('DEBUG: Auto-created default profile for authId: $authId', level: LogLevel.info);
-        return insertedUser;
+        try {
+          final insertedUser = await User.db.insertRow(session, newUser);
+          session.log('DEBUG: Auto-created default profile for authId: $authId', level: LogLevel.info);
+          return insertedUser;
+        } catch (e) {
+          // If insert fails (e.g., unique constraint violation from a race condition),
+          // try to fetch the profile again.
+          session.log('DEBUG: Insert failed ($e), trying to fetch again for authId: $authId', level: LogLevel.warning);
+          final existing = await User.db.findFirstRow(
+            session,
+            where: (t) => t.userInfoId.equals(authId),
+          );
+          if (existing != null) return existing;
+          rethrow;
+        }
       } else {
         session.log('DEBUG: Found profile for user: ${user.name} (ID: ${user.id})', level: LogLevel.debug);
       }
@@ -74,12 +86,45 @@ class UserEndpoint extends Endpoint {
   }
 
   Future<User> updateUser(Session session, User user) async {
-    final authInfo = session.authenticated;
+    print('DEBUG-AUTH: [Endpoint] Entering updateUser...');
+    final authInfo = await session.authenticated;
+    print('DEBUG-AUTH: [Endpoint] session.authenticated result: $authInfo');
+    
     if (authInfo == null) {
-      throw Exception('Unauthenticated');
+      print('DEBUG-AUTH-ERROR: [Endpoint] authInfo is null. Authentication failed.');
+      throw Exception('Serverpod: User is not authenticated. Please ensure the authorization header is sent correctly.');
+    }
+    
+    final userId = authInfo.userId;
+
+    // Find the actual user record for this authenticated account
+    final existingUser = await User.db.findFirstRow(
+      session,
+      where: (t) => t.userInfoId.equals(userId),
+    );
+
+    if (existingUser == null) {
+      throw Exception('User profile not found. Please complete registration first.');
     }
 
-    user.updatedAt = DateTime.now();
-    return await User.db.updateRow(session, user);
+    // Merge incoming data into existing record to preserve the correct 'id' and 'userInfoId'
+    existingUser.name = user.name;
+    existingUser.age = user.age;
+    existingUser.gender = user.gender;
+    existingUser.height = user.height;
+    existingUser.currentWeight = user.currentWeight;
+    existingUser.targetWeight = user.targetWeight;
+    existingUser.waterGlassSize = user.waterGlassSize;
+    existingUser.updatedAt = DateTime.now();
+
+    return await User.db.updateRow(session, existingUser);
+  }
+
+  Future<User?> getMe(Session session) async {
+    final authInfo = await session.authenticated;
+    if (authInfo == null) return null;
+    
+    return await getUserByAuthId(session, authInfo.userId);
   }
 }
+

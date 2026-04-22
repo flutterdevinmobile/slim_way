@@ -1,11 +1,21 @@
 import 'package:serverpod/serverpod.dart';
+import 'package:serverpod_auth_server/serverpod_auth_server.dart';
 import '../generated/protocol.dart';
 
 class FoodEndpoint extends Endpoint {
   Future<Food> addFood(Session session, Food food) async {
+    final authInfo = await session.authenticated;
+    if (authInfo == null) {
+      throw Exception('Serverpod: User is not authenticated.');
+    }
+
     if (food.calories <= 0) {
       throw Exception('Kaloriya miqdori 0 dan katta bo\'lishi kerak');
     }
+
+    // Server-side sanitation
+    food.userId = authInfo.userId;
+    food.createdAt = DateTime.now();
 
     await Food.db.insertRow(session, food);
 
@@ -21,7 +31,12 @@ class FoodEndpoint extends Endpoint {
       food.createdAt,
     );
 
+
+    // Update streak (Food logging is mandatory for streak)
+    await _updateUserStreak(session, food.userId, food.createdAt);
+
     return food;
+
   }
 
   Future<List<Food>> getFoodLogs(
@@ -115,6 +130,33 @@ class FoodEndpoint extends Endpoint {
       await DailyLog.db.updateRow(session, log);
     }
   }
+
+  Future<void> _updateUserStreak(Session session, int userId, DateTime logDate) async {
+    final user = await User.db.findById(session, userId);
+    if (user == null) return;
+
+    final today = DateTime.utc(logDate.year, logDate.month, logDate.day);
+    final lastLog = user.lastFoodLogDate != null 
+        ? DateTime.utc(user.lastFoodLogDate!.year, user.lastFoodLogDate!.month, user.lastFoodLogDate!.day) 
+        : null;
+
+    if (lastLog == null) {
+      user.streakCount = 1;
+      user.lastFoodLogDate = today;
+    } else if (today.isAfter(lastLog)) {
+      final difference = today.difference(lastLog).inDays;
+      if (difference == 1) {
+        user.streakCount += 1;
+      } else if (difference > 1) {
+        user.streakCount = 1;
+      }
+      user.lastFoodLogDate = today;
+    }
+    
+    user.updatedAt = DateTime.now();
+    await User.db.updateRow(session, user);
+  }
+
 
   Future<void> deleteFood(Session session, int foodId, int userId) async {
     final food = await Food.db.findById(session, foodId);
