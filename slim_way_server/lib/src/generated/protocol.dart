@@ -25,9 +25,10 @@ import 'user.dart' as _i10;
 import 'walk.dart' as _i11;
 import 'weekly_weight.dart' as _i12;
 import 'package:slim_way_server/src/generated/food.dart' as _i13;
-import 'package:slim_way_server/src/generated/daily_log.dart' as _i14;
-import 'package:slim_way_server/src/generated/walk.dart' as _i15;
-import 'package:slim_way_server/src/generated/weekly_weight.dart' as _i16;
+import 'package:slim_way_server/src/generated/user.dart' as _i14;
+import 'package:slim_way_server/src/generated/daily_log.dart' as _i15;
+import 'package:slim_way_server/src/generated/walk.dart' as _i16;
+import 'package:slim_way_server/src/generated/weekly_weight.dart' as _i17;
 export 'ai_analysis_result.dart';
 export 'daily_log.dart';
 export 'food.dart';
@@ -317,6 +318,19 @@ class Protocol extends _i1.SerializationManagerServer {
           isNullable: true,
           dartType: 'int?',
         ),
+        _i2.ColumnDefinition(
+          name: 'streakCount',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+          columnDefault: '0',
+        ),
+        _i2.ColumnDefinition(
+          name: 'lastFoodLogDate',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
       ],
       foreignKeys: [
         _i2.ForeignKeyDefinition(
@@ -581,16 +595,19 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == List<_i13.Food>) {
       return (data as List).map((e) => deserialize<_i13.Food>(e)).toList() as T;
     }
-    if (t == List<_i14.DailyLog>) {
-      return (data as List).map((e) => deserialize<_i14.DailyLog>(e)).toList()
+    if (t == List<_i14.User>) {
+      return (data as List).map((e) => deserialize<_i14.User>(e)).toList() as T;
+    }
+    if (t == List<_i15.DailyLog>) {
+      return (data as List).map((e) => deserialize<_i15.DailyLog>(e)).toList()
           as T;
     }
-    if (t == List<_i15.Walk>) {
-      return (data as List).map((e) => deserialize<_i15.Walk>(e)).toList() as T;
+    if (t == List<_i16.Walk>) {
+      return (data as List).map((e) => deserialize<_i16.Walk>(e)).toList() as T;
     }
-    if (t == List<_i16.WeeklyWeight>) {
+    if (t == List<_i17.WeeklyWeight>) {
       return (data as List)
-              .map((e) => deserialize<_i16.WeeklyWeight>(e))
+              .map((e) => deserialize<_i17.WeeklyWeight>(e))
               .toList()
           as T;
     }

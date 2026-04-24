@@ -10,7 +10,7 @@ class UserEndpoint extends Endpoint {
     }
 
     final userId = authInfo.userId;
-    print('SERVER createUser: userId=$userId, name=${user.name}');
+    session.log('SERVER createUser: userId=$userId, name=${user.name}', level: LogLevel.info);
 
     // Set mandatory fields
     user.createdAt = DateTime.now();
@@ -24,7 +24,7 @@ class UserEndpoint extends Endpoint {
     );
 
     if (existingUser != null) {
-      print('SERVER createUser: Profile already exists for userId=$userId. Returning existing.');
+      session.log('SERVER createUser: Profile already exists for userId=$userId. Returning existing.', level: LogLevel.info);
       return existingUser;
     }
 
@@ -86,12 +86,11 @@ class UserEndpoint extends Endpoint {
   }
 
   Future<User> updateUser(Session session, User user) async {
-    print('DEBUG-AUTH: [Endpoint] Entering updateUser...');
-    final authInfo = await session.authenticated;
-    print('DEBUG-AUTH: [Endpoint] session.authenticated result: $authInfo');
+    final authInfo = session.authenticated;
+    session.log('DEBUG-AUTH: [Endpoint] session.authenticated result: $authInfo', level: LogLevel.debug);
     
     if (authInfo == null) {
-      print('DEBUG-AUTH-ERROR: [Endpoint] authInfo is null. Authentication failed.');
+      session.log('DEBUG-AUTH-ERROR: [Endpoint] authInfo is null. Authentication failed.', level: LogLevel.error);
       throw Exception('Serverpod: User is not authenticated. Please ensure the authorization header is sent correctly.');
     }
     
@@ -121,7 +120,7 @@ class UserEndpoint extends Endpoint {
   }
 
   Future<User?> getMe(Session session) async {
-    final authInfo = await session.authenticated;
+    final authInfo = session.authenticated;
     if (authInfo == null) return null;
     
     return await getUserByAuthId(session, authInfo.userId);

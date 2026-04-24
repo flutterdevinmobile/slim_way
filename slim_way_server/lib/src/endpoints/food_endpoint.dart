@@ -4,7 +4,7 @@ import '../generated/protocol.dart';
 
 class FoodEndpoint extends Endpoint {
   Future<Food> addFood(Session session, Food food) async {
-    final authInfo = await session.authenticated;
+    final authInfo = session.authenticated;
     if (authInfo == null) {
       throw Exception('Serverpod: User is not authenticated.');
     }

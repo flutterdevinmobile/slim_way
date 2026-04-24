@@ -16,22 +16,24 @@ import '../auth/jwt_refresh_endpoint.dart' as _i3;
 import '../endpoints/ai_endpoint.dart' as _i4;
 import '../endpoints/food_endpoint.dart' as _i5;
 import '../endpoints/google_auth_endpoint.dart' as _i6;
-import '../endpoints/stats_endpoint.dart' as _i7;
-import '../endpoints/user_endpoint.dart' as _i8;
-import '../endpoints/walk_endpoint.dart' as _i9;
-import '../endpoints/water_endpoint.dart' as _i10;
-import '../endpoints/weekly_weight_endpoint.dart' as _i11;
-import '../greetings/greeting_endpoint.dart' as _i12;
-import 'dart:typed_data' as _i13;
-import 'package:slim_way_server/src/generated/food.dart' as _i14;
-import 'package:slim_way_server/src/generated/user.dart' as _i15;
-import 'package:slim_way_server/src/generated/walk.dart' as _i16;
-import 'package:slim_way_server/src/generated/weekly_weight.dart' as _i17;
-import 'package:serverpod_auth_server/serverpod_auth_server.dart' as _i18;
+import '../endpoints/leaderboard_endpoint.dart' as _i7;
+import '../endpoints/stats_endpoint.dart' as _i8;
+import '../endpoints/user_endpoint.dart' as _i9;
+import '../endpoints/walk_endpoint.dart' as _i10;
+import '../endpoints/water_endpoint.dart' as _i11;
+import '../endpoints/weekly_weight_endpoint.dart' as _i12;
+import '../greetings/greeting_endpoint.dart' as _i13;
+import 'dart:typed_data' as _i14;
+import 'package:slim_way_server/src/generated/daily_log.dart' as _i15;
+import 'package:slim_way_server/src/generated/food.dart' as _i16;
+import 'package:slim_way_server/src/generated/user.dart' as _i17;
+import 'package:slim_way_server/src/generated/walk.dart' as _i18;
+import 'package:slim_way_server/src/generated/weekly_weight.dart' as _i19;
+import 'package:serverpod_auth_server/serverpod_auth_server.dart' as _i20;
 import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
-    as _i19;
+    as _i21;
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
-    as _i20;
+    as _i22;
 
 class Endpoints extends _i1.EndpointDispatch {
   @override
@@ -67,37 +69,43 @@ class Endpoints extends _i1.EndpointDispatch {
           'googleAuth',
           null,
         ),
-      'stats': _i7.StatsEndpoint()
+      'leaderboard': _i7.LeaderboardEndpoint()
+        ..initialize(
+          server,
+          'leaderboard',
+          null,
+        ),
+      'stats': _i8.StatsEndpoint()
         ..initialize(
           server,
           'stats',
           null,
         ),
-      'user': _i8.UserEndpoint()
+      'user': _i9.UserEndpoint()
         ..initialize(
           server,
           'user',
           null,
         ),
-      'walk': _i9.WalkEndpoint()
+      'walk': _i10.WalkEndpoint()
         ..initialize(
           server,
           'walk',
           null,
         ),
-      'water': _i10.WaterEndpoint()
+      'water': _i11.WaterEndpoint()
         ..initialize(
           server,
           'water',
           null,
         ),
-      'weeklyWeight': _i11.WeeklyWeightEndpoint()
+      'weeklyWeight': _i12.WeeklyWeightEndpoint()
         ..initialize(
           server,
           'weeklyWeight',
           null,
         ),
-      'greeting': _i12.GreetingEndpoint()
+      'greeting': _i13.GreetingEndpoint()
         ..initialize(
           server,
           'greeting',
@@ -307,7 +315,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'imageData': _i1.ParameterDescription(
               name: 'imageData',
-              type: _i1.getType<_i13.ByteData>(),
+              type: _i1.getType<_i14.ByteData>(),
               nullable: false,
             ),
             'customPrompt': _i1.ParameterDescription(
@@ -339,6 +347,11 @@ class Endpoints extends _i1.EndpointDispatch {
               type: _i1.getType<String>(),
               nullable: false,
             ),
+            'dailyLog': _i1.ParameterDescription(
+              name: 'dailyLog',
+              type: _i1.getType<_i15.DailyLog?>(),
+              nullable: true,
+            ),
           },
           call:
               (
@@ -348,6 +361,7 @@ class Endpoints extends _i1.EndpointDispatch {
                 session,
                 params['history'],
                 params['message'],
+                dailyLog: params['dailyLog'],
               ),
         ),
       },
@@ -361,7 +375,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'food': _i1.ParameterDescription(
               name: 'food',
-              type: _i1.getType<_i14.Food>(),
+              type: _i1.getType<_i16.Food>(),
               nullable: false,
             ),
           },
@@ -504,6 +518,41 @@ class Endpoints extends _i1.EndpointDispatch {
         ),
       },
     );
+    connectors['leaderboard'] = _i1.EndpointConnector(
+      name: 'leaderboard',
+      endpoint: endpoints['leaderboard']!,
+      methodConnectors: {
+        'getTopUsers': _i1.MethodConnector(
+          name: 'getTopUsers',
+          params: {},
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['leaderboard'] as _i7.LeaderboardEndpoint)
+                  .getTopUsers(session),
+        ),
+        'getUserRank': _i1.MethodConnector(
+          name: 'getUserRank',
+          params: {
+            'userId': _i1.ParameterDescription(
+              name: 'userId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['leaderboard'] as _i7.LeaderboardEndpoint)
+                  .getUserRank(
+                    session,
+                    params['userId'],
+                  ),
+        ),
+      },
+    );
     connectors['stats'] = _i1.EndpointConnector(
       name: 'stats',
       endpoint: endpoints['stats']!,
@@ -527,7 +576,7 @@ class Endpoints extends _i1.EndpointDispatch {
                 _i1.Session session,
                 Map<String, dynamic> params,
               ) async =>
-                  (endpoints['stats'] as _i7.StatsEndpoint).getDailySummary(
+                  (endpoints['stats'] as _i8.StatsEndpoint).getDailySummary(
                     session,
                     params['userId'],
                     params['date'],
@@ -546,7 +595,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['stats'] as _i7.StatsEndpoint).getHistory(
+              ) async => (endpoints['stats'] as _i8.StatsEndpoint).getHistory(
                 session,
                 params['userId'],
               ),
@@ -562,7 +611,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'user': _i1.ParameterDescription(
               name: 'user',
-              type: _i1.getType<_i15.User>(),
+              type: _i1.getType<_i17.User>(),
               nullable: false,
             ),
           },
@@ -570,7 +619,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['user'] as _i8.UserEndpoint).createUser(
+              ) async => (endpoints['user'] as _i9.UserEndpoint).createUser(
                 session,
                 params['user'],
               ),
@@ -588,7 +637,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['user'] as _i8.UserEndpoint).getUser(
+              ) async => (endpoints['user'] as _i9.UserEndpoint).getUser(
                 session,
                 params['id'],
               ),
@@ -607,7 +656,7 @@ class Endpoints extends _i1.EndpointDispatch {
                 _i1.Session session,
                 Map<String, dynamic> params,
               ) async =>
-                  (endpoints['user'] as _i8.UserEndpoint).getUserByAuthId(
+                  (endpoints['user'] as _i9.UserEndpoint).getUserByAuthId(
                     session,
                     params['authId'],
                   ),
@@ -617,7 +666,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'user': _i1.ParameterDescription(
               name: 'user',
-              type: _i1.getType<_i15.User>(),
+              type: _i1.getType<_i17.User>(),
               nullable: false,
             ),
           },
@@ -625,10 +674,19 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['user'] as _i8.UserEndpoint).updateUser(
+              ) async => (endpoints['user'] as _i9.UserEndpoint).updateUser(
                 session,
                 params['user'],
               ),
+        ),
+        'getMe': _i1.MethodConnector(
+          name: 'getMe',
+          params: {},
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['user'] as _i9.UserEndpoint).getMe(session),
         ),
       },
     );
@@ -641,7 +699,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'walk': _i1.ParameterDescription(
               name: 'walk',
-              type: _i1.getType<_i16.Walk>(),
+              type: _i1.getType<_i18.Walk>(),
               nullable: false,
             ),
           },
@@ -649,7 +707,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['walk'] as _i9.WalkEndpoint).addWalk(
+              ) async => (endpoints['walk'] as _i10.WalkEndpoint).addWalk(
                 session,
                 params['walk'],
               ),
@@ -677,7 +735,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['walk'] as _i9.WalkEndpoint).syncSteps(
+              ) async => (endpoints['walk'] as _i10.WalkEndpoint).syncSteps(
                 session,
                 params['userId'],
                 params['newSteps'],
@@ -702,7 +760,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['walk'] as _i9.WalkEndpoint).getWalkLogs(
+              ) async => (endpoints['walk'] as _i10.WalkEndpoint).getWalkLogs(
                 session,
                 params['userId'],
                 params['date'],
@@ -731,12 +789,13 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['walk'] as _i9.WalkEndpoint).getWalkHistory(
-                session,
-                params['userId'],
-                params['startDate'],
-                params['endDate'],
-              ),
+              ) async =>
+                  (endpoints['walk'] as _i10.WalkEndpoint).getWalkHistory(
+                    session,
+                    params['userId'],
+                    params['startDate'],
+                    params['endDate'],
+                  ),
         ),
       },
     );
@@ -767,7 +826,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['water'] as _i10.WaterEndpoint).addWater(
+              ) async => (endpoints['water'] as _i11.WaterEndpoint).addWater(
                 session,
                 params['userId'],
                 params['amountMl'],
@@ -792,7 +851,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['water'] as _i10.WaterEndpoint)
+              ) async => (endpoints['water'] as _i11.WaterEndpoint)
                   .updateWaterGlassSize(
                     session,
                     params['userId'],
@@ -810,7 +869,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'weight': _i1.ParameterDescription(
               name: 'weight',
-              type: _i1.getType<_i17.WeeklyWeight>(),
+              type: _i1.getType<_i19.WeeklyWeight>(),
               nullable: false,
             ),
           },
@@ -819,7 +878,7 @@ class Endpoints extends _i1.EndpointDispatch {
                 _i1.Session session,
                 Map<String, dynamic> params,
               ) async =>
-                  (endpoints['weeklyWeight'] as _i11.WeeklyWeightEndpoint)
+                  (endpoints['weeklyWeight'] as _i12.WeeklyWeightEndpoint)
                       .addWeight(
                         session,
                         params['weight'],
@@ -839,7 +898,7 @@ class Endpoints extends _i1.EndpointDispatch {
                 _i1.Session session,
                 Map<String, dynamic> params,
               ) async =>
-                  (endpoints['weeklyWeight'] as _i11.WeeklyWeightEndpoint)
+                  (endpoints['weeklyWeight'] as _i12.WeeklyWeightEndpoint)
                       .getWeightHistory(
                         session,
                         params['userId'],
@@ -864,17 +923,17 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['greeting'] as _i12.GreetingEndpoint).hello(
+              ) async => (endpoints['greeting'] as _i13.GreetingEndpoint).hello(
                 session,
                 params['name'],
               ),
         ),
       },
     );
-    modules['serverpod_auth'] = _i18.Endpoints()..initializeEndpoints(server);
-    modules['serverpod_auth_idp'] = _i19.Endpoints()
+    modules['serverpod_auth'] = _i20.Endpoints()..initializeEndpoints(server);
+    modules['serverpod_auth_idp'] = _i21.Endpoints()
       ..initializeEndpoints(server);
-    modules['serverpod_auth_core'] = _i20.Endpoints()
+    modules['serverpod_auth_core'] = _i22.Endpoints()
       ..initializeEndpoints(server);
   }
 }

@@ -18,8 +18,8 @@ import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
     as _i4;
 import 'package:slim_way_client/src/protocol/ai_analysis_result.dart' as _i5;
 import 'dart:typed_data' as _i6;
-import 'package:slim_way_client/src/protocol/food.dart' as _i7;
-import 'package:slim_way_client/src/protocol/daily_log.dart' as _i8;
+import 'package:slim_way_client/src/protocol/daily_log.dart' as _i7;
+import 'package:slim_way_client/src/protocol/food.dart' as _i8;
 import 'package:slim_way_client/src/protocol/user.dart' as _i9;
 import 'package:slim_way_client/src/protocol/walk.dart' as _i10;
 import 'package:slim_way_client/src/protocol/weekly_weight.dart' as _i11;
@@ -262,13 +262,15 @@ class EndpointAi extends _i2.EndpointRef {
 
   _i3.Future<String> chatWithAi(
     List<String> history,
-    String message,
-  ) => caller.callServerEndpoint<String>(
+    String message, {
+    _i7.DailyLog? dailyLog,
+  }) => caller.callServerEndpoint<String>(
     'ai',
     'chatWithAi',
     {
       'history': history,
       'message': message,
+      'dailyLog': dailyLog,
     },
   );
 }
@@ -280,17 +282,17 @@ class EndpointFood extends _i2.EndpointRef {
   @override
   String get name => 'food';
 
-  _i3.Future<_i7.Food> addFood(_i7.Food food) =>
-      caller.callServerEndpoint<_i7.Food>(
+  _i3.Future<_i8.Food> addFood(_i8.Food food) =>
+      caller.callServerEndpoint<_i8.Food>(
         'food',
         'addFood',
         {'food': food},
       );
 
-  _i3.Future<List<_i7.Food>> getFoodLogs(
+  _i3.Future<List<_i8.Food>> getFoodLogs(
     int userId,
     DateTime date,
-  ) => caller.callServerEndpoint<List<_i7.Food>>(
+  ) => caller.callServerEndpoint<List<_i8.Food>>(
     'food',
     'getFoodLogs',
     {
@@ -299,11 +301,11 @@ class EndpointFood extends _i2.EndpointRef {
     },
   );
 
-  _i3.Future<List<_i7.Food>> getFoodHistory(
+  _i3.Future<List<_i8.Food>> getFoodHistory(
     int userId,
     DateTime startDate,
     DateTime endDate,
-  ) => caller.callServerEndpoint<List<_i7.Food>>(
+  ) => caller.callServerEndpoint<List<_i8.Food>>(
     'food',
     'getFoodHistory',
     {
@@ -358,16 +360,39 @@ class EndpointGoogleAuth extends _i2.EndpointRef {
 }
 
 /// {@category Endpoint}
+class EndpointLeaderboard extends _i2.EndpointRef {
+  EndpointLeaderboard(_i2.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'leaderboard';
+
+  /// Top 10 users by streak count
+  _i3.Future<List<_i9.User>> getTopUsers() =>
+      caller.callServerEndpoint<List<_i9.User>>(
+        'leaderboard',
+        'getTopUsers',
+        {},
+      );
+
+  /// Get rank of a specific user
+  _i3.Future<int> getUserRank(int userId) => caller.callServerEndpoint<int>(
+    'leaderboard',
+    'getUserRank',
+    {'userId': userId},
+  );
+}
+
+/// {@category Endpoint}
 class EndpointStats extends _i2.EndpointRef {
   EndpointStats(_i2.EndpointCaller caller) : super(caller);
 
   @override
   String get name => 'stats';
 
-  _i3.Future<_i8.DailyLog?> getDailySummary(
+  _i3.Future<_i7.DailyLog?> getDailySummary(
     int userId,
     DateTime date,
-  ) => caller.callServerEndpoint<_i8.DailyLog?>(
+  ) => caller.callServerEndpoint<_i7.DailyLog?>(
     'stats',
     'getDailySummary',
     {
@@ -376,8 +401,8 @@ class EndpointStats extends _i2.EndpointRef {
     },
   );
 
-  _i3.Future<List<_i8.DailyLog>> getHistory(int userId) =>
-      caller.callServerEndpoint<List<_i8.DailyLog>>(
+  _i3.Future<List<_i7.DailyLog>> getHistory(int userId) =>
+      caller.callServerEndpoint<List<_i7.DailyLog>>(
         'stats',
         'getHistory',
         {'userId': userId},
@@ -417,6 +442,12 @@ class EndpointUser extends _i2.EndpointRef {
         'updateUser',
         {'user': user},
       );
+
+  _i3.Future<_i9.User?> getMe() => caller.callServerEndpoint<_i9.User?>(
+    'user',
+    'getMe',
+    {},
+  );
 }
 
 /// {@category Endpoint}
@@ -426,12 +457,11 @@ class EndpointWalk extends _i2.EndpointRef {
   @override
   String get name => 'walk';
 
-  _i3.Future<_i10.Walk> addWalk(_i10.Walk walk) =>
-      caller.callServerEndpoint<_i10.Walk>(
-        'walk',
-        'addWalk',
-        {'walk': walk},
-      );
+  _i3.Future<void> addWalk(_i10.Walk walk) => caller.callServerEndpoint<void>(
+    'walk',
+    'addWalk',
+    {'walk': walk},
+  );
 
   _i3.Future<void> syncSteps(
     int userId,
@@ -482,11 +512,11 @@ class EndpointWater extends _i2.EndpointRef {
   String get name => 'water';
 
   /// Foydalanuvchining bugungi suv iste'molini oshirish
-  _i3.Future<_i8.DailyLog> addWater(
+  _i3.Future<_i7.DailyLog> addWater(
     int userId,
     int amountMl,
     DateTime date,
-  ) => caller.callServerEndpoint<_i8.DailyLog>(
+  ) => caller.callServerEndpoint<_i7.DailyLog>(
     'water',
     'addWater',
     {
@@ -598,6 +628,7 @@ class Client extends _i2.ServerpodClientShared {
     ai = EndpointAi(this);
     food = EndpointFood(this);
     googleAuth = EndpointGoogleAuth(this);
+    leaderboard = EndpointLeaderboard(this);
     stats = EndpointStats(this);
     user = EndpointUser(this);
     walk = EndpointWalk(this);
@@ -616,6 +647,8 @@ class Client extends _i2.ServerpodClientShared {
   late final EndpointFood food;
 
   late final EndpointGoogleAuth googleAuth;
+
+  late final EndpointLeaderboard leaderboard;
 
   late final EndpointStats stats;
 
@@ -638,6 +671,7 @@ class Client extends _i2.ServerpodClientShared {
     'ai': ai,
     'food': food,
     'googleAuth': googleAuth,
+    'leaderboard': leaderboard,
     'stats': stats,
     'user': user,
     'walk': walk,

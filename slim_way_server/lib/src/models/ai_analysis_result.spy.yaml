@@ -7,3 +7,8 @@ fields:
   protein: double?
   fat: double?
   carbs: double?
+  tipsUz: String?
+  tipsEn: String?
+  tipsRu: String?
+  portionSize: String?
+

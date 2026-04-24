@@ -1,115 +1,115 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:slim_way_client/slim_way_client.dart';
 import 'package:serverpod_flutter/serverpod_flutter.dart';
 import 'package:serverpod_auth_shared_flutter/serverpod_auth_shared_flutter.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'dart:io';
 import 'dart:ui';
 import 'dart:isolate';
 
-import 'src/theme.dart';
-import 'src/providers/app_state.dart';
-import 'src/screens/profile_screen.dart';
-import 'src/screens/home_screen.dart';
-import 'src/screens/food_history_screen.dart';
-import 'src/screens/main_screen.dart';
-import 'src/screens/splash_screen.dart';
-import 'src/screens/add_food_screen.dart';
-import 'src/utils/notification_service.dart';
-import 'src/utils/hive_key_manager.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:slim_way_flutter/shared/application/configs/di/injection_container.dart';
+import 'package:slim_way_flutter/shared/utils/notification_service.dart';
+import 'package:slim_way_flutter/shared/utils/hive_key_manager.dart';
+import 'package:slim_way_flutter/features/home/data/datasources/summary_local_data_source.dart';
+import 'package:slim_way_flutter/shared/application/services/sync_service.dart';
+import 'package:slim_way_flutter/shared/application/services/sensor_sync_service.dart';
+
+
+
+import 'app.dart';
+import 'package:slim_way_flutter/features/auth/presentation/blocs/auth_bloc/auth_bloc.dart';
+import 'package:slim_way_flutter/features/home/presentation/blocs/summary_bloc/summary_bloc.dart';
+import 'package:slim_way_flutter/features/activity/presentation/blocs/activity_bloc/activity_bloc.dart';
+import 'package:slim_way_flutter/features/food/presentation/blocs/food_bloc/food_bloc.dart';
+import 'package:slim_way_flutter/features/stats/presentation/blocs/stats_bloc/stats_bloc.dart';
+import 'package:slim_way_flutter/features/chat/presentation/blocs/chat_bloc/chat_bloc.dart';
+import 'package:slim_way_flutter/shared/presentation/blocs/settings_bloc/settings_bloc.dart';
+import 'package:slim_way_flutter/shared/presentation/blocs/navigation_bloc/navigation_bloc.dart';
 
 late final Client client;
 late final SessionManager sessionManager;
 late final HiveAuthenticationKeyManager authKeyManager;
 
-// PC ning lokal IP manzili (dart run --dart-define=SERVER_IP=x.x.x.x bilan o'zgartirish mumkin)
-// Haqiqiy qurilma: PC ning WiFi IP manzili (ipconfig da ko'ring)
-// Emulyator:       10.0.2.2
-const String _serverIp = String.fromEnvironment('SERVER_IP', defaultValue: '192.168.1.7');
+const String _serverIp = String.fromEnvironment('SERVER_IP', defaultValue: 'slim-way-server.onrender.com');
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await EasyLocalization.ensureInitialized();
 
-  // Communication Bridge for Notifications
   final receivePort = ReceivePort();
   IsolateNameServer.removePortNameMapping(NotificationService.portName);
   IsolateNameServer.registerPortWithName(receivePort.sendPort, NotificationService.portName);
   receivePort.listen((message) {
-      if (message is int) {
-          NotificationService.relayUpdate(message);
-      }
+    if (message is int) {
+      NotificationService.relayUpdate(message);
+    }
   });
 
-  // Hive ni ishga tushirish
   await Hive.initFlutter();
+  await SummaryLocalDataSourceImpl.init();
 
-  // Google Sign-In ni ishga tushirish (authenticate() dan OLDIN shart)
-  await GoogleSignIn.instance.initialize();
+  // GoogleSignIn is handled by serverpod_auth_google_flutter internally
+
 
   authKeyManager = HiveAuthenticationKeyManager();
 
-  // Server manzili: real qurilma uchun LAN IP, emulyator uchun 10.0.2.2
-  final String host;
-  if (Platform.isAndroid) {
-    host = _serverIp; // flutter run --dart-define=SERVER_IP=10.0.2.2  (emulator uchun)
-  } else {
-    host = 'localhost';
-  }
+  final String host = _serverIp;
+  // Use HTTPS for Render, HTTP for local
+  final String protocol = host.contains('onrender.com') ? 'https' : 'http';
+  // Render handles port routing (443), local needs 3000
+  final String portSuffix = host.contains('onrender.com') ? '' : ':3000';
 
-  print('DEBUG: Connecting to server at http://$host:3000/');
   client = Client(
-    'http://$host:3000/',
+    '$protocol://$host$portSuffix/',
+    // ignore: deprecated_member_use
     authenticationKeyManager: authKeyManager,
   )..connectivityMonitor = FlutterConnectivityMonitor();
 
-  // Initialize SessionManager with the caller from our client
-  // It will automatically use the same keyManager we set on the client
   sessionManager = SessionManager(
     caller: client.modules.auth,
   );
-  
+
   try {
-    print('DEBUG: Initializing SessionManager...');
+    debugPrint('DEBUG: SessionManager.initialize() starting...');
     await sessionManager.initialize();
-    await NotificationService.initialize(); // Notification initialize
-    print('DEBUG: SessionManager initialized. User: ${sessionManager.signedInUser?.email}');
+    debugPrint('DEBUG: SessionManager initialized. isSignedIn: ${sessionManager.isSignedIn}');
+    if (sessionManager.isSignedIn) {
+      debugPrint('DEBUG: Current User ID: ${sessionManager.signedInUser?.id}');
+    }
+    
+    await NotificationService.initialize();
+    await initDependencies();
+
+    // Start background sync
+    sl<SyncService>().startAutoSync();
+    await sl<SensorSyncService>().initialize();
+
   } catch (e) {
-    print('CRITICAL ERROR: SessionManager initialization failed: $e');
+    debugPrint('CRITICAL ERROR: Initialization failed: $e');
   }
+
 
   runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => AppState()),
-      ],
-      child: const MyApp(),
+    EasyLocalization(
+      supportedLocales: const [Locale('uz'), Locale('en'), Locale('ru')],
+      path: 'assets/langs',
+      fallbackLocale: const Locale('uz'),
+      startLocale: const Locale('uz'),
+      saveLocale: true,
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider(create: (_) => sl<SettingsBloc>()),
+          BlocProvider(create: (_) => sl<NavigationBloc>()),
+          BlocProvider(create: (_) => sl<AuthBloc>()..add(AuthInitRequested())),
+          BlocProvider(create: (_) => sl<SummaryBloc>()),
+          BlocProvider(create: (_) => sl<ActivityBloc>()),
+          BlocProvider(create: (_) => sl<FoodBloc>()),
+          BlocProvider(create: (_) => sl<StatsBloc>()),
+          BlocProvider(create: (_) => sl<ChatBloc>()),
+        ],
+        child: const MyApp(),
+      ),
     ),
   );
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final appState = context.watch<AppState>();
-    
-    return MaterialApp(
-      title: 'SlimWay Premium',
-      themeMode: appState.themeMode,
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      debugShowCheckedModeBanner: false,
-      home: const SplashScreen(),
-      routes: {
-        '/main': (context) => const MainScreen(),
-        '/profile': (context) => const ProfileScreen(),
-        '/home': (context) => const HomeScreen(),
-        '/food-history': (context) => const FoodHistoryScreen(),
-        '/add-food': (context) => const AddFoodScreen(),
-      },
-    );
-  }
 }

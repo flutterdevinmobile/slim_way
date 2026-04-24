@@ -26,7 +26,9 @@ abstract class User implements _i1.SerializableModel {
     required this.createdAt,
     required this.updatedAt,
     this.waterGlassSize,
-  });
+    int? streakCount,
+    this.lastFoodLogDate,
+  }) : streakCount = streakCount ?? 0;
 
   factory User({
     int? id,
@@ -41,6 +43,8 @@ abstract class User implements _i1.SerializableModel {
     required DateTime createdAt,
     required DateTime updatedAt,
     int? waterGlassSize,
+    int? streakCount,
+    DateTime? lastFoodLogDate,
   }) = _UserImpl;
 
   factory User.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -61,6 +65,12 @@ abstract class User implements _i1.SerializableModel {
         jsonSerialization['updatedAt'],
       ),
       waterGlassSize: jsonSerialization['waterGlassSize'] as int?,
+      streakCount: jsonSerialization['streakCount'] as int?,
+      lastFoodLogDate: jsonSerialization['lastFoodLogDate'] == null
+          ? null
+          : _i1.DateTimeJsonExtension.fromJson(
+              jsonSerialization['lastFoodLogDate'],
+            ),
     );
   }
 
@@ -91,6 +101,10 @@ abstract class User implements _i1.SerializableModel {
 
   int? waterGlassSize;
 
+  int streakCount;
+
+  DateTime? lastFoodLogDate;
+
   /// Returns a shallow copy of this [User]
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
@@ -107,6 +121,8 @@ abstract class User implements _i1.SerializableModel {
     DateTime? createdAt,
     DateTime? updatedAt,
     int? waterGlassSize,
+    int? streakCount,
+    DateTime? lastFoodLogDate,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -124,6 +140,8 @@ abstract class User implements _i1.SerializableModel {
       'createdAt': createdAt.toJson(),
       'updatedAt': updatedAt.toJson(),
       if (waterGlassSize != null) 'waterGlassSize': waterGlassSize,
+      'streakCount': streakCount,
+      if (lastFoodLogDate != null) 'lastFoodLogDate': lastFoodLogDate?.toJson(),
     };
   }
 
@@ -149,6 +167,8 @@ class _UserImpl extends User {
     required DateTime createdAt,
     required DateTime updatedAt,
     int? waterGlassSize,
+    int? streakCount,
+    DateTime? lastFoodLogDate,
   }) : super._(
          id: id,
          userInfoId: userInfoId,
@@ -162,6 +182,8 @@ class _UserImpl extends User {
          createdAt: createdAt,
          updatedAt: updatedAt,
          waterGlassSize: waterGlassSize,
+         streakCount: streakCount,
+         lastFoodLogDate: lastFoodLogDate,
        );
 
   /// Returns a shallow copy of this [User]
@@ -181,6 +203,8 @@ class _UserImpl extends User {
     DateTime? createdAt,
     DateTime? updatedAt,
     Object? waterGlassSize = _Undefined,
+    int? streakCount,
+    Object? lastFoodLogDate = _Undefined,
   }) {
     return User(
       id: id is int? ? id : this.id,
@@ -197,6 +221,10 @@ class _UserImpl extends User {
       waterGlassSize: waterGlassSize is int?
           ? waterGlassSize
           : this.waterGlassSize,
+      streakCount: streakCount ?? this.streakCount,
+      lastFoodLogDate: lastFoodLogDate is DateTime?
+          ? lastFoodLogDate
+          : this.lastFoodLogDate,
     );
   }
 }

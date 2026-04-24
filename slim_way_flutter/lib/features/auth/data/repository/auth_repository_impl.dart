@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:slim_way_client/slim_way_client.dart';
 import 'package:serverpod_auth_client/serverpod_auth_client.dart';
 import 'package:serverpod_auth_shared_flutter/serverpod_auth_shared_flutter.dart';
@@ -89,32 +90,32 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Safed<BaseException, User?>> validateAccount(String email, String code) {
     return safeCall(() async {
-      print('DEBUG: validateAccount starting for $email');
+      debugPrint('DEBUG: validateAccount starting for $email');
       final userInfo = await _authController.validateAccount(email, code);
       if (userInfo == null) {
-        print('DEBUG: validateAccount returned null userInfo');
+        debugPrint('DEBUG: validateAccount returned null userInfo');
         throw Exception('Invalid verification code');
       }
 
-      print('DEBUG: Verification successful. UserInfo ID: ${userInfo.id}');
+      debugPrint('DEBUG: Verification successful. UserInfo ID: ${userInfo.id}');
 
       // Attempt auto-login if password is known
       if (_pendingPassword != null) {
-        print('DEBUG: Attempting auto-login with pending password');
+        debugPrint('DEBUG: Attempting auto-login with pending password');
         final loginInfo = await _authController.signIn(email, _pendingPassword!);
         if (loginInfo != null) {
-          print('DEBUG: Auto-login successful');
+          debugPrint('DEBUG: Auto-login successful');
           // Give SessionManager a moment to reflect the change
           await Future.delayed(const Duration(milliseconds: 500));
         } else {
-          print('DEBUG: Auto-login failed even after successful validation');
+          debugPrint('DEBUG: Auto-login failed even after successful validation');
         }
       } else {
-        print('DEBUG: No pending password found for auto-login');
+        debugPrint('DEBUG: No pending password found for auto-login');
       }
       
       _pendingPassword = null;
-      print('DEBUG: Fetching profile for authId: ${userInfo.id}');
+      debugPrint('DEBUG: Fetching profile for authId: ${userInfo.id}');
       return await client.user.getUserByAuthId(userInfo.id!);
     });
   }

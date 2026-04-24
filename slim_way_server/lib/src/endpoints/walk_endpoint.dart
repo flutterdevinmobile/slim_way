@@ -1,14 +1,24 @@
 import 'package:serverpod/serverpod.dart';
+import 'package:serverpod_auth_server/serverpod_auth_server.dart';
 import '../generated/protocol.dart';
 
 class WalkEndpoint extends Endpoint {
-  Future<Walk> addWalk(Session session, Walk walk) async {
+  Future<void> addWalk(Session session, Walk walk) async {
+    final authInfo = session.authenticated;
+    
+    if (authInfo == null) {
+      session.log('DEBUG: [WalkEndpoint] AuthInfo is NULL', level: LogLevel.error);
+      throw Exception('Serverpod: User is not authenticated.');
+    }
+    
+    final userId = authInfo.userId;
+    session.log('DEBUG: [WalkEndpoint] Authenticated User ID: $userId', level: LogLevel.debug);
+    
+    walk.userId = userId;
     await Walk.db.insertRow(session, walk);
 
     // Update Daily Log
     await _updateDailyLog(session, walk.userId, 0, walk.calories, walk.createdAt);
-
-    return walk;
   }
 
   Future<void> syncSteps(Session session, int userId, int newSteps, DateTime date) async {
@@ -25,7 +35,7 @@ class WalkEndpoint extends Endpoint {
           (t.distanceKm.equals(-1.0)), 
     );
 
-    double addedCalories = newSteps * 0.04; 
+    double addedCalories = newSteps * 0.04;
 
     if (autoWalk == null) {
       autoWalk = Walk(
@@ -33,17 +43,24 @@ class WalkEndpoint extends Endpoint {
         steps: newSteps,
         distanceKm: -1.0,
         calories: addedCalories,
-        createdAt: DateTime.now(),
+        createdAt: startOfDay, // Use start of day for identification
       );
       await Walk.db.insertRow(session, autoWalk);
+      
+      if (addedCalories > 0) {
+        await _updateDailyLog(session, userId, 0, addedCalories, date);
+      }
     } else {
-      autoWalk.steps += newSteps;
-      autoWalk.calories += addedCalories;
+      // Calculate delta to update DailyLog accurately
+      double calorieDelta = addedCalories - autoWalk.calories;
+      
+      autoWalk.steps = newSteps;
+      autoWalk.calories = addedCalories;
       await Walk.db.updateRow(session, autoWalk);
-    }
 
-    if (addedCalories > 0) {
-      await _updateDailyLog(session, userId, 0, addedCalories, date);
+      if (calorieDelta != 0) {
+        await _updateDailyLog(session, userId, 0, calorieDelta, date);
+      }
     }
   }
 

@@ -60,13 +60,11 @@ void run(List<String> args) async {
   auth.AuthConfig.set(
     auth.AuthConfig(
       sendValidationEmail: (session, email, validationCode) async {
-        print('====================================');
-        print('VERIFICATION CODE for $email: $validationCode');
-        print('====================================');
+        session.log('VERIFICATION CODE for $email: $validationCode', level: LogLevel.info);
         return true;
       },
       onUserCreated: (session, userInfo) async {
-        print('SUCCESS: Auth record created for: ${userInfo.email}');
+        session.log('SUCCESS: Auth record created for: ${userInfo.email}', level: LogLevel.info);
       },
       // Note: In 3.2.x session duration is managed via token managers.
       // Default is usually 7 days for server-side sessions.

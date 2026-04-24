@@ -21,6 +21,10 @@ abstract class AiAnalysisResult implements _i1.SerializableModel {
     this.protein,
     this.fat,
     this.carbs,
+    this.tipsUz,
+    this.tipsEn,
+    this.tipsRu,
+    this.portionSize,
   });
 
   factory AiAnalysisResult({
@@ -31,6 +35,10 @@ abstract class AiAnalysisResult implements _i1.SerializableModel {
     double? protein,
     double? fat,
     double? carbs,
+    String? tipsUz,
+    String? tipsEn,
+    String? tipsRu,
+    String? portionSize,
   }) = _AiAnalysisResultImpl;
 
   factory AiAnalysisResult.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -42,6 +50,10 @@ abstract class AiAnalysisResult implements _i1.SerializableModel {
       protein: (jsonSerialization['protein'] as num?)?.toDouble(),
       fat: (jsonSerialization['fat'] as num?)?.toDouble(),
       carbs: (jsonSerialization['carbs'] as num?)?.toDouble(),
+      tipsUz: jsonSerialization['tipsUz'] as String?,
+      tipsEn: jsonSerialization['tipsEn'] as String?,
+      tipsRu: jsonSerialization['tipsRu'] as String?,
+      portionSize: jsonSerialization['portionSize'] as String?,
     );
   }
 
@@ -59,6 +71,14 @@ abstract class AiAnalysisResult implements _i1.SerializableModel {
 
   double? carbs;
 
+  String? tipsUz;
+
+  String? tipsEn;
+
+  String? tipsRu;
+
+  String? portionSize;
+
   /// Returns a shallow copy of this [AiAnalysisResult]
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
@@ -70,6 +90,10 @@ abstract class AiAnalysisResult implements _i1.SerializableModel {
     double? protein,
     double? fat,
     double? carbs,
+    String? tipsUz,
+    String? tipsEn,
+    String? tipsRu,
+    String? portionSize,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -82,6 +106,10 @@ abstract class AiAnalysisResult implements _i1.SerializableModel {
       if (protein != null) 'protein': protein,
       if (fat != null) 'fat': fat,
       if (carbs != null) 'carbs': carbs,
+      if (tipsUz != null) 'tipsUz': tipsUz,
+      if (tipsEn != null) 'tipsEn': tipsEn,
+      if (tipsRu != null) 'tipsRu': tipsRu,
+      if (portionSize != null) 'portionSize': portionSize,
     };
   }
 
@@ -102,6 +130,10 @@ class _AiAnalysisResultImpl extends AiAnalysisResult {
     double? protein,
     double? fat,
     double? carbs,
+    String? tipsUz,
+    String? tipsEn,
+    String? tipsRu,
+    String? portionSize,
   }) : super._(
          nameUz: nameUz,
          nameEn: nameEn,
@@ -110,6 +142,10 @@ class _AiAnalysisResultImpl extends AiAnalysisResult {
          protein: protein,
          fat: fat,
          carbs: carbs,
+         tipsUz: tipsUz,
+         tipsEn: tipsEn,
+         tipsRu: tipsRu,
+         portionSize: portionSize,
        );
 
   /// Returns a shallow copy of this [AiAnalysisResult]
@@ -124,6 +160,10 @@ class _AiAnalysisResultImpl extends AiAnalysisResult {
     Object? protein = _Undefined,
     Object? fat = _Undefined,
     Object? carbs = _Undefined,
+    Object? tipsUz = _Undefined,
+    Object? tipsEn = _Undefined,
+    Object? tipsRu = _Undefined,
+    Object? portionSize = _Undefined,
   }) {
     return AiAnalysisResult(
       nameUz: nameUz is String? ? nameUz : this.nameUz,
@@ -133,6 +173,10 @@ class _AiAnalysisResultImpl extends AiAnalysisResult {
       protein: protein is double? ? protein : this.protein,
       fat: fat is double? ? fat : this.fat,
       carbs: carbs is double? ? carbs : this.carbs,
+      tipsUz: tipsUz is String? ? tipsUz : this.tipsUz,
+      tipsEn: tipsEn is String? ? tipsEn : this.tipsEn,
+      tipsRu: tipsRu is String? ? tipsRu : this.tipsRu,
+      portionSize: portionSize is String? ? portionSize : this.portionSize,
     );
   }
 }

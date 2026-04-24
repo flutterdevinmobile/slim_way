@@ -19,14 +19,15 @@ import 'user.dart' as _i6;
 import 'walk.dart' as _i7;
 import 'weekly_weight.dart' as _i8;
 import 'package:slim_way_client/src/protocol/food.dart' as _i9;
-import 'package:slim_way_client/src/protocol/daily_log.dart' as _i10;
-import 'package:slim_way_client/src/protocol/walk.dart' as _i11;
-import 'package:slim_way_client/src/protocol/weekly_weight.dart' as _i12;
-import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i13;
+import 'package:slim_way_client/src/protocol/user.dart' as _i10;
+import 'package:slim_way_client/src/protocol/daily_log.dart' as _i11;
+import 'package:slim_way_client/src/protocol/walk.dart' as _i12;
+import 'package:slim_way_client/src/protocol/weekly_weight.dart' as _i13;
+import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i14;
 import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
-    as _i14;
-import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
     as _i15;
+import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
+    as _i16;
 export 'ai_analysis_result.dart';
 export 'daily_log.dart';
 export 'food.dart';
@@ -118,27 +119,30 @@ class Protocol extends _i1.SerializationManager {
     if (t == List<_i9.Food>) {
       return (data as List).map((e) => deserialize<_i9.Food>(e)).toList() as T;
     }
-    if (t == List<_i10.DailyLog>) {
-      return (data as List).map((e) => deserialize<_i10.DailyLog>(e)).toList()
+    if (t == List<_i10.User>) {
+      return (data as List).map((e) => deserialize<_i10.User>(e)).toList() as T;
+    }
+    if (t == List<_i11.DailyLog>) {
+      return (data as List).map((e) => deserialize<_i11.DailyLog>(e)).toList()
           as T;
     }
-    if (t == List<_i11.Walk>) {
-      return (data as List).map((e) => deserialize<_i11.Walk>(e)).toList() as T;
+    if (t == List<_i12.Walk>) {
+      return (data as List).map((e) => deserialize<_i12.Walk>(e)).toList() as T;
     }
-    if (t == List<_i12.WeeklyWeight>) {
+    if (t == List<_i13.WeeklyWeight>) {
       return (data as List)
-              .map((e) => deserialize<_i12.WeeklyWeight>(e))
+              .map((e) => deserialize<_i13.WeeklyWeight>(e))
               .toList()
           as T;
     }
-    try {
-      return _i13.Protocol().deserialize<T>(data, t);
-    } on _i1.DeserializationTypeNotFoundException catch (_) {}
     try {
       return _i14.Protocol().deserialize<T>(data, t);
     } on _i1.DeserializationTypeNotFoundException catch (_) {}
     try {
       return _i15.Protocol().deserialize<T>(data, t);
+    } on _i1.DeserializationTypeNotFoundException catch (_) {}
+    try {
+      return _i16.Protocol().deserialize<T>(data, t);
     } on _i1.DeserializationTypeNotFoundException catch (_) {}
     return super.deserialize<T>(data, t);
   }
@@ -181,15 +185,15 @@ class Protocol extends _i1.SerializationManager {
       case _i8.WeeklyWeight():
         return 'WeeklyWeight';
     }
-    className = _i13.Protocol().getClassNameForObject(data);
+    className = _i14.Protocol().getClassNameForObject(data);
     if (className != null) {
       return 'serverpod_auth.$className';
     }
-    className = _i14.Protocol().getClassNameForObject(data);
+    className = _i15.Protocol().getClassNameForObject(data);
     if (className != null) {
       return 'serverpod_auth_idp.$className';
     }
-    className = _i15.Protocol().getClassNameForObject(data);
+    className = _i16.Protocol().getClassNameForObject(data);
     if (className != null) {
       return 'serverpod_auth_core.$className';
     }
@@ -225,15 +229,15 @@ class Protocol extends _i1.SerializationManager {
     }
     if (dataClassName.startsWith('serverpod_auth.')) {
       data['className'] = dataClassName.substring(15);
-      return _i13.Protocol().deserializeByClassName(data);
+      return _i14.Protocol().deserializeByClassName(data);
     }
     if (dataClassName.startsWith('serverpod_auth_idp.')) {
       data['className'] = dataClassName.substring(19);
-      return _i14.Protocol().deserializeByClassName(data);
+      return _i15.Protocol().deserializeByClassName(data);
     }
     if (dataClassName.startsWith('serverpod_auth_core.')) {
       data['className'] = dataClassName.substring(20);
-      return _i15.Protocol().deserializeByClassName(data);
+      return _i16.Protocol().deserializeByClassName(data);
     }
     return super.deserializeByClassName(data);
   }
@@ -248,13 +252,13 @@ class Protocol extends _i1.SerializationManager {
       return null;
     }
     try {
-      return _i13.Protocol().mapRecordToJson(record);
-    } catch (_) {}
-    try {
       return _i14.Protocol().mapRecordToJson(record);
     } catch (_) {}
     try {
       return _i15.Protocol().mapRecordToJson(record);
+    } catch (_) {}
+    try {
+      return _i16.Protocol().mapRecordToJson(record);
     } catch (_) {}
     throw Exception('Unsupported record type ${record.runtimeType}');
   }

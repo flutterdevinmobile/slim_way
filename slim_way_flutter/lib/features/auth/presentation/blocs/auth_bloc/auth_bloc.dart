@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:slim_way_client/slim_way_client.dart';
@@ -23,23 +24,23 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   Future<void> _onAuthInitRequested(AuthInitRequested event, Emitter<AuthState> emit) async {
-    print('DEBUG: AuthBloc._onAuthInitRequested starting...');
+    debugPrint('DEBUG: AuthBloc._onAuthInitRequested starting...');
     emit(AuthPrepare());
     final initResult = await _authRepository.initializeSession();
     
     await initResult.when<Future<void>>(
       success: (_) async {
-        print('DEBUG: initializeSession success. isSignedIn: ${_authRepository.isSignedIn}');
+        debugPrint('DEBUG: initializeSession success. isSignedIn: ${_authRepository.isSignedIn}');
         if (_authRepository.isSignedIn) {
           final userInfo = _authRepository.signedInUser;
           if (userInfo != null) {
-            print('DEBUG: userInfo found in cache. ID: ${userInfo.id}');
+            debugPrint('DEBUG: userInfo found in cache. ID: ${userInfo.id}');
             final userInfoId = userInfo.id!;
             final userResult = await _authRepository.getUserByAuthId(userInfoId);
             userResult.when(
               success: (user) {
                 if (user != null) {
-                  print('DEBUG: User profile fetched. Name: ${user.name}');
+                  debugPrint('DEBUG: User profile fetched. Name: ${user.name}');
                   
                   // Ensure name is not empty
                   if (user.name.trim().isEmpty) {
@@ -48,18 +49,18 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
                   emit(AuthAuthenticated(user));
                 } else {
-                  print('DEBUG: No profile found for ID $userInfoId');
+                  debugPrint('DEBUG: No profile found for ID $userInfoId');
                   emit(AuthNeedsSetup(userInfoId));
                 }
               },
               failure: (err) {
-                print('DEBUG: getUserByAuthId failed: $err');
+                debugPrint('DEBUG: getUserByAuthId failed: $err');
                 // OFFLINE MODE Support:
                 // If it's a network error (SocketException, timeout, etc.), 
                 // stay authenticated using a placeholder user or cached info.
                 final errStr = err.toString().toLowerCase();
                 if (errStr.contains('socket') || errStr.contains('timeout') || errStr.contains('host')) {
-                  print('DEBUG: Connectivity issue detected. Entering Offline Mode.');
+                  debugPrint('DEBUG: Connectivity issue detected. Entering Offline Mode.');
                   final dummyUser = User(
                     userInfoId: userInfo.id!,
                     name: userInfo.userName ?? userInfo.email?.split('@').first ?? 'Offline User',
@@ -78,12 +79,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
               },
             );
           } else {
-            print('DEBUG: signedInUser is null. Calling getMe()...');
+            debugPrint('DEBUG: signedInUser is null. Calling getMe()...');
             final meResult = await _authRepository.getMe();
             meResult.when(
               success: (user) {
                 if (user != null) {
-                  print('DEBUG: getMe() success. User: ${user.name}');
+                  debugPrint('DEBUG: getMe() success. User: ${user.name}');
 
                   // Ensure name is not empty
                   if (user.name.trim().isEmpty) {
@@ -92,23 +93,23 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
                   emit(AuthAuthenticated(user));
                 } else {
-                  print('DEBUG: getMe() returned null');
+                  debugPrint('DEBUG: getMe() returned null');
                   emit(AuthUnauthenticated());
                 }
               },
               failure: (err) {
-                print('DEBUG: getMe() failed: $err');
+                debugPrint('DEBUG: getMe() failed: $err');
                 emit(AuthUnauthenticated());
               },
             );
           }
         } else {
-          print('DEBUG: isSignedIn is false');
+          debugPrint('DEBUG: isSignedIn is false');
           emit(AuthUnauthenticated());
         }
       },
       failure: (error) async {
-        print('DEBUG: initializeSession failed: $error');
+        debugPrint('DEBUG: initializeSession failed: $error');
         emit(AuthFailure(error));
       },
     );
@@ -180,7 +181,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         failure: (error) {
           // Send error to UI but DO NOT change the state to AuthFailure 
           // because we don't want to logout the user for a transient update error.
-          print('DEBUG: Profile update failed: $error');
+          debugPrint('DEBUG: Profile update failed: $error');
           // We can't easily send a "one-off" notification through Bloc state without a new state,
           // but at least we stay Authenticated.
           emit(AuthAuthenticated(currentState.user)); 

@@ -26,7 +26,9 @@ abstract class User implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
     required this.createdAt,
     required this.updatedAt,
     this.waterGlassSize,
-  });
+    int? streakCount,
+    this.lastFoodLogDate,
+  }) : streakCount = streakCount ?? 0;
 
   factory User({
     int? id,
@@ -41,6 +43,8 @@ abstract class User implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
     required DateTime createdAt,
     required DateTime updatedAt,
     int? waterGlassSize,
+    int? streakCount,
+    DateTime? lastFoodLogDate,
   }) = _UserImpl;
 
   factory User.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -61,6 +65,12 @@ abstract class User implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
         jsonSerialization['updatedAt'],
       ),
       waterGlassSize: jsonSerialization['waterGlassSize'] as int?,
+      streakCount: jsonSerialization['streakCount'] as int?,
+      lastFoodLogDate: jsonSerialization['lastFoodLogDate'] == null
+          ? null
+          : _i1.DateTimeJsonExtension.fromJson(
+              jsonSerialization['lastFoodLogDate'],
+            ),
     );
   }
 
@@ -93,6 +103,10 @@ abstract class User implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
 
   int? waterGlassSize;
 
+  int streakCount;
+
+  DateTime? lastFoodLogDate;
+
   @override
   _i1.Table<int?> get table => t;
 
@@ -112,6 +126,8 @@ abstract class User implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
     DateTime? createdAt,
     DateTime? updatedAt,
     int? waterGlassSize,
+    int? streakCount,
+    DateTime? lastFoodLogDate,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -129,6 +145,8 @@ abstract class User implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
       'createdAt': createdAt.toJson(),
       'updatedAt': updatedAt.toJson(),
       if (waterGlassSize != null) 'waterGlassSize': waterGlassSize,
+      'streakCount': streakCount,
+      if (lastFoodLogDate != null) 'lastFoodLogDate': lastFoodLogDate?.toJson(),
     };
   }
 
@@ -148,6 +166,8 @@ abstract class User implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
       'createdAt': createdAt.toJson(),
       'updatedAt': updatedAt.toJson(),
       if (waterGlassSize != null) 'waterGlassSize': waterGlassSize,
+      'streakCount': streakCount,
+      if (lastFoodLogDate != null) 'lastFoodLogDate': lastFoodLogDate?.toJson(),
     };
   }
 
@@ -197,6 +217,8 @@ class _UserImpl extends User {
     required DateTime createdAt,
     required DateTime updatedAt,
     int? waterGlassSize,
+    int? streakCount,
+    DateTime? lastFoodLogDate,
   }) : super._(
          id: id,
          userInfoId: userInfoId,
@@ -210,6 +232,8 @@ class _UserImpl extends User {
          createdAt: createdAt,
          updatedAt: updatedAt,
          waterGlassSize: waterGlassSize,
+         streakCount: streakCount,
+         lastFoodLogDate: lastFoodLogDate,
        );
 
   /// Returns a shallow copy of this [User]
@@ -229,6 +253,8 @@ class _UserImpl extends User {
     DateTime? createdAt,
     DateTime? updatedAt,
     Object? waterGlassSize = _Undefined,
+    int? streakCount,
+    Object? lastFoodLogDate = _Undefined,
   }) {
     return User(
       id: id is int? ? id : this.id,
@@ -245,6 +271,10 @@ class _UserImpl extends User {
       waterGlassSize: waterGlassSize is int?
           ? waterGlassSize
           : this.waterGlassSize,
+      streakCount: streakCount ?? this.streakCount,
+      lastFoodLogDate: lastFoodLogDate is DateTime?
+          ? lastFoodLogDate
+          : this.lastFoodLogDate,
     );
   }
 }
@@ -309,6 +339,17 @@ class UserUpdateTable extends _i1.UpdateTable<UserTable> {
     table.waterGlassSize,
     value,
   );
+
+  _i1.ColumnValue<int, int> streakCount(int value) => _i1.ColumnValue(
+    table.streakCount,
+    value,
+  );
+
+  _i1.ColumnValue<DateTime, DateTime> lastFoodLogDate(DateTime? value) =>
+      _i1.ColumnValue(
+        table.lastFoodLogDate,
+        value,
+      );
 }
 
 class UserTable extends _i1.Table<int?> {
@@ -358,6 +399,15 @@ class UserTable extends _i1.Table<int?> {
       'waterGlassSize',
       this,
     );
+    streakCount = _i1.ColumnInt(
+      'streakCount',
+      this,
+      hasDefault: true,
+    );
+    lastFoodLogDate = _i1.ColumnDateTime(
+      'lastFoodLogDate',
+      this,
+    );
   }
 
   late final UserUpdateTable updateTable;
@@ -384,6 +434,10 @@ class UserTable extends _i1.Table<int?> {
 
   late final _i1.ColumnInt waterGlassSize;
 
+  late final _i1.ColumnInt streakCount;
+
+  late final _i1.ColumnDateTime lastFoodLogDate;
+
   @override
   List<_i1.Column> get columns => [
     id,
@@ -398,6 +452,8 @@ class UserTable extends _i1.Table<int?> {
     createdAt,
     updatedAt,
     waterGlassSize,
+    streakCount,
+    lastFoodLogDate,
   ];
 }
 

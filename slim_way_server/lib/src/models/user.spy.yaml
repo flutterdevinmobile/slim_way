@@ -12,6 +12,9 @@ fields:
   createdAt: DateTime
   updatedAt: DateTime
   waterGlassSize: int?
+  streakCount: int, default=0
+  lastFoodLogDate: DateTime?
+
 indexes:
   user_info_id_idx:
     fields: userInfoId

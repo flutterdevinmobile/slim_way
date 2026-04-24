@@ -19,6 +19,9 @@ food:
 googleAuth:
   - signInWithGoogle:
   - signInWithAccessToken:
+leaderboard:
+  - getTopUsers:
+  - getUserRank:
 stats:
   - getDailySummary:
   - getHistory:
@@ -27,6 +30,7 @@ user:
   - getUser:
   - getUserByAuthId:
   - updateUser:
+  - getMe:
 walk:
   - addWalk:
   - syncSteps:

@@ -9,21 +9,21 @@
 # Configuration for the main API server.
 apiServer:
   port: 3000
-  publicHost: 192.168.1.7
+  publicHost: 192.168.1.3
   publicPort: 3000
   publicScheme: http
 
 # Configuration for the Insights server.
 insightsServer:
   port: 3001
-  publicHost: 192.168.1.7
+  publicHost: 192.168.1.3
   publicPort: 3001
   publicScheme: http
 
 # Configuration for the web server.
 webServer:
   port: 3002
-  publicHost: 192.168.1.7
+  publicHost: 192.168.1.3
   publicPort: 3002
   publicScheme: http
 

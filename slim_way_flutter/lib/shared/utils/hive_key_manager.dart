@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:serverpod_auth_shared_flutter/serverpod_auth_shared_flutter.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -18,47 +19,47 @@ class HiveAuthenticationKeyManager extends FlutterAuthenticationKeyManager {
     final box = await _getBox();
     final String? key = box.get(_keyName);
     final cleaned = _cleanKey(key);
-    print('DEBUG: HiveKeyManager.get() box:$_boxName, raw:|$key| -> clean:|$cleaned|');
+    debugPrint('DEBUG: HiveKeyManager.get() box:$_boxName, raw:|$key| -> clean:|$cleaned|');
     return cleaned;
   }
 
   @override
   Future<void> put(String key) async {
-    print('DEBUG: HiveKeyManager.put() CALLED with raw key: |$key|');
+    debugPrint('DEBUG: HiveKeyManager.put() CALLED with raw key: |$key|');
     final cleaned = _cleanKey(key);
     if (cleaned == null) {
-      print('DEBUG: HiveKeyManager - KEY REJECTED: Validation failed for |$key|');
+      debugPrint('DEBUG: HiveKeyManager - KEY REJECTED: Validation failed for |$key|');
       return;
     }
 
     final box = await _getBox();
-    print('DEBUG: HiveKeyManager - Storing cleaned key: |$cleaned|');
+    debugPrint('DEBUG: HiveKeyManager - Storing cleaned key: |$cleaned|');
     
     await box.put(_keyName, cleaned);
-    print('DEBUG: HiveKeyManager - SUCCESS: Key stored in Hive box "$_boxName"');
+    debugPrint('DEBUG: HiveKeyManager - SUCCESS: Key stored in Hive box "$_boxName"');
   }
 
 
   @override
   Future<void> remove() async {
-    print('DEBUG: HiveKeyManager.remove()');
+    debugPrint('DEBUG: HiveKeyManager.remove()');
     final box = await _getBox();
     await box.delete(_keyName);
   }
 
   @override
-  Future<String?> toHeaderValue([String? authenticationKey]) async {
+  Future<String?> toHeaderValue([String? key]) async {
     // Both get() and the parameter are now subject to cleaning
     final String? rawKey =
-        (authenticationKey != null && authenticationKey.isNotEmpty)
-        ? authenticationKey
+        (key != null && key.isNotEmpty)
+        ? key
         : await get();
 
     final String? clean = _cleanKey(rawKey);
     if (clean == null) return null;
 
     final header = 'Bearer $clean';
-    print('DEBUG: HiveKeyManager.toHeaderValue() -> |$header|');
+    debugPrint('DEBUG: HiveKeyManager.toHeaderValue() -> |$header|');
     return header;
   }
 
@@ -85,7 +86,7 @@ class HiveAuthenticationKeyManager extends FlutterAuthenticationKeyManager {
     // Validation: Expect "id:key"
     final colonIndex = cleanKey.indexOf(':');
     if (colonIndex <= 0 || colonIndex == cleanKey.length - 1) {
-      print(
+      debugPrint(
         'WARNING: HiveKeyManager - Key format unexpected (no colon), returning raw: |$cleanKey|',
       );
       return cleanKey;
@@ -93,7 +94,7 @@ class HiveAuthenticationKeyManager extends FlutterAuthenticationKeyManager {
 
     final idPart = cleanKey.substring(0, colonIndex);
     if (int.tryParse(idPart) == null) {
-      print(
+      debugPrint(
         'DEBUG: HiveKeyManager - Malformed key (ID not integer): |$cleanKey|',
       );
       return null;
