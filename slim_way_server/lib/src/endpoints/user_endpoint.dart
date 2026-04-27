@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'package:serverpod/serverpod.dart';
 import 'package:serverpod_auth_server/serverpod_auth_server.dart';
+import 'package:google_generative_ai/google_generative_ai.dart';
 import '../generated/protocol.dart';
 
 class UserEndpoint extends Endpoint {
@@ -106,6 +108,45 @@ class UserEndpoint extends Endpoint {
       throw Exception('User profile not found. Please complete registration first.');
     }
 
+    // AI GENERATION FOR NUTRITION
+    final apiKey = session.passwords['googleAiApiKey'];
+    if (apiKey != null && apiKey.isNotEmpty && user.activityLevel != null && user.monthlyWeightLossGoal != null) {
+      try {
+        final model = GenerativeModel(model: 'gemini-2.5-flash-lite', apiKey: apiKey);
+        final prompt = '''
+        You are an elite clinical nutritionist AI.
+        User Profile:
+        Age: ${user.age}
+        Gender: ${user.gender}
+        Height: ${user.height} cm
+        Current Weight: ${user.currentWeight} kg
+        Activity Level: ${user.activityLevel}
+        Goal: Lose ${user.monthlyWeightLossGoal} kg per month.
+        
+        Calculate the precise daily calorie limit (integer) and daily water intake in ml (integer) for this user to achieve their goal safely. Use established scientific formulas (like Mifflin-St Jeor).
+        Respond ONLY with valid JSON. Example: {"calories": 1800, "water": 2500}
+        ''';
+        
+        session.log('AI Calculation started for user \$userId', level: LogLevel.info);
+        final response = await model.generateContent([Content.text(prompt)]);
+        final text = response.text;
+        if (text != null && text.isNotEmpty) {
+          final cleaned = text.replaceAll('```json', '').replaceAll('```', '').trim();
+          final match = RegExp(r'\{[^{}]*\}').firstMatch(cleaned);
+          if (match != null) {
+            final json = jsonDecode(match.group(0)!);
+            final cal = (json['calories'] as num?)?.toInt();
+            final h2o = (json['water'] as num?)?.toInt();
+            if (cal != null) user.dailyCalorieGoal = cal;
+            if (h2o != null) user.dailyWaterGoal = h2o;
+            session.log('AI Success: \$cal kcal, \$h2o ml water', level: LogLevel.info);
+          }
+        }
+      } catch (e) {
+        session.log('AI Recalculation failed: \$e', level: LogLevel.error);
+      }
+    }
+
     // Merge incoming data into existing record to preserve the correct 'id' and 'userInfoId'
     existingUser.name = user.name;
     existingUser.age = user.age;
@@ -114,6 +155,12 @@ class UserEndpoint extends Endpoint {
     existingUser.currentWeight = user.currentWeight;
     existingUser.targetWeight = user.targetWeight;
     existingUser.waterGlassSize = user.waterGlassSize;
+    existingUser.activityLevel = user.activityLevel;
+    existingUser.monthlyWeightLossGoal = user.monthlyWeightLossGoal;
+    
+    if (user.dailyCalorieGoal != null) existingUser.dailyCalorieGoal = user.dailyCalorieGoal;
+    if (user.dailyWaterGoal != null) existingUser.dailyWaterGoal = user.dailyWaterGoal;
+    
     existingUser.updatedAt = DateTime.now();
 
     return await User.db.updateRow(session, existingUser);

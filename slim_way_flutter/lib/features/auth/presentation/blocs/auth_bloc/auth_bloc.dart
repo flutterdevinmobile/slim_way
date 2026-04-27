@@ -40,7 +40,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
                   if (user.name.trim().isEmpty) {
                     user.name = userInfo.userName ?? userInfo.email?.split('@').first ?? 'User';
                   }
-                  emit(AuthAuthenticated(user));
+                  if (user.activityLevel == null || user.activityLevel!.isEmpty) {
+                    emit(AuthNeedsSetup(userInfoId));
+                  } else {
+                    emit(AuthAuthenticated(user));
+                  }
                 } else {
                   emit(AuthNeedsSetup(userInfoId));
                 }
@@ -98,7 +102,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     result.when(
       success: (user) {
         if (user != null) {
-          emit(AuthAuthenticated(user));
+          if (user.activityLevel == null || user.activityLevel!.isEmpty) {
+            emit(AuthNeedsSetup(_authRepository.signedInUser!.id!));
+          } else {
+            emit(AuthAuthenticated(user));
+          }
         } else {
           final userInfoId = _authRepository.signedInUser?.id;
           if (userInfoId != null) {
@@ -133,7 +141,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     result.when(
       success: (user) {
         if (user != null) {
-          emit(AuthAuthenticated(user));
+          if (user.activityLevel == null || user.activityLevel!.isEmpty) {
+            emit(AuthNeedsSetup(_authRepository.signedInUser!.id!));
+          } else {
+            emit(AuthAuthenticated(user));
+          }
         } else {
           final userInfoId = _authRepository.signedInUser?.id;
           if (userInfoId != null) {
@@ -149,11 +161,19 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Future<void> _onAuthUserUpdateRequested(AuthUserUpdateRequested event, Emitter<AuthState> emit) async {
     final currentState = state;
-    if (currentState is AuthAuthenticated) {
+    if (currentState is AuthAuthenticated || currentState is AuthNeedsSetup) {
+      emit(AuthPrepare());
       final result = await _authRepository.updateUser(event.user);
       result.when(
         success: (user) => emit(AuthAuthenticated(user)),
-        failure: (_) => emit(AuthAuthenticated(currentState.user)),
+        failure: (error) {
+          if (currentState is AuthAuthenticated) {
+            emit(AuthAuthenticated(currentState.user));
+          } else {
+            emit(AuthNeedsSetup(event.user.userInfoId!));
+          }
+          emit(AuthFailure(error));
+        },
       );
     }
   }
@@ -169,7 +189,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     result.when(
       success: (user) {
         if (user != null) {
-          emit(AuthAuthenticated(user));
+          if (user.activityLevel == null || user.activityLevel!.isEmpty) {
+            emit(AuthNeedsSetup(_authRepository.signedInUser!.id!));
+          } else {
+            emit(AuthAuthenticated(user));
+          }
         } else {
           final userInfoId = _authRepository.signedInUser?.id;
           if (userInfoId != null) {

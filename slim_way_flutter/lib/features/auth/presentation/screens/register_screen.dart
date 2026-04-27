@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:slim_way_flutter/shared/presentation/theme/theme.dart';
 import 'package:slim_way_flutter/features/auth/presentation/blocs/auth_bloc/auth_bloc.dart';
-import 'package:slim_way_flutter/features/home/presentation/screens/home_screen.dart'; // Just for redirection
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -56,7 +55,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (context, state) {
         state.whenOrNull(
-          failure: (error) => setState(() => _errorMessage = error.toString()),
+          failure: (error) => setState(() => _errorMessage = error.userFriendlyMessage),
           unauthenticated: () {
             if (!_showVerification && _emailController.text.isNotEmpty && _passwordController.text.isNotEmpty) {
               setState(() {
@@ -74,11 +73,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 content: Text('auth.verified_success'.tr()),
                 backgroundColor: Colors.green,
               ),
-            );
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (_) => const HomeScreen()),
-              (route) => false,
             );
           },
         );
@@ -152,12 +146,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           onFieldSubmitted: (_) => isLoading ? null : _createAccount(),
                         ),
                       ] else ...[
+                        const SizedBox(height: 16),
                         TextFormField(
                           controller: _verificationController,
-                          style: const TextStyle(color: Colors.white),
+                          maxLength: 5,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(color: AppTheme.primaryColor, fontSize: 32, letterSpacing: 24, fontWeight: FontWeight.bold),
                           decoration: InputDecoration(
-                            labelText: 'auth.verification_code'.tr(),
-                            prefixIcon: const Icon(Icons.verified_user_outlined),
+                            hintText: '00000',
+                            hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.1), letterSpacing: 24),
+                            counterText: '',
+                            filled: true,
+                            fillColor: Colors.white.withValues(alpha: 0.05),
+                            contentPadding: const EdgeInsets.symmetric(vertical: 24),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
                           ),
                           keyboardType: TextInputType.number,
                           textInputAction: TextInputAction.done,

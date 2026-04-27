@@ -66,14 +66,13 @@ class _HomeScreenState extends State<HomeScreen> {
                           orElse: () => 0,
                         );
 
-                        final calorieLimit = UserUtils.calculateCalorieLimit(
-                          user,
-                        );
+                        final calorieLimit = user.dailyCalorieGoal?.toDouble() ?? 
+                            UserUtils.calculateCalorieLimit(user);
+                        final waterGoal = user.dailyWaterGoal ?? 2000;
+                        
                         final proteinGoal = user.currentWeight * 1.5;
                         final fatGoal = calorieLimit * 0.25 / 9;
-                        final carbsGoal =
-                            (calorieLimit - (proteinGoal * 4) - (fatGoal * 9)) /
-                            4;
+                        final carbsGoal = (calorieLimit - (proteinGoal * 4) - (fatGoal * 9)) / 4;
 
                         return Scaffold(
                           backgroundColor: Colors.transparent,
@@ -161,8 +160,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       ),
                                     ),
                                   ),
-                                  SizedBox(height: 24.h),
-                                  _buildDailyChallenge(log, isDark),
+                                  _buildDailyChallenge(log, isDark, waterGoal),
                                   SizedBox(height: 32.h),
 
                                   _buildSectionHeader(
@@ -216,10 +214,9 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildDailyChallenge(DailyLog? log, bool isDark) {
+  Widget _buildDailyChallenge(DailyLog? log, bool isDark, int waterGoal) {
     final waterMl = log?.waterMl ?? 0;
-    const waterChallenge = 2000;
-    final progress = (waterMl / waterChallenge).clamp(0.0, 1.0);
+    final progress = (waterMl / waterGoal).clamp(0.0, 1.0);
     final isDone = progress >= 1.0;
 
     return Container(

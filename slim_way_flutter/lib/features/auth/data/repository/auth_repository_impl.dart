@@ -68,7 +68,7 @@ class AuthRepositoryImpl implements AuthRepository {
           );
 
           if (userInfo == null) {
-            throw Exception('Google login bekor qilindi yoki xato yuz berdi.');
+            throw Exception('Google orqali kirish bekor qilindi yoki xato yuz berdi.');
           }
 
           return await client.user.getUserByAuthId(userInfo.id!);

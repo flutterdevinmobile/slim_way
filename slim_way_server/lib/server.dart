@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:serverpod/serverpod.dart';
 import 'package:serverpod_auth_server/serverpod_auth_server.dart' as auth;
@@ -56,11 +57,38 @@ void run(List<String> args) async {
     return null;
   };
 
-  // Configure additional auth settings (Email, User Creation)
   auth.AuthConfig.set(
     auth.AuthConfig(
       sendValidationEmail: (session, email, validationCode) async {
-        session.log('VERIFICATION CODE for $email: $validationCode', level: LogLevel.info);
+        // Avtomatik yaratilgan kodni 5 xonali raqamga almashtiramiz
+        final numericCode = (Random.secure().nextInt(90000) + 10000).toString();
+        
+        await auth.EmailCreateAccountRequest.db.updateWhere(
+          session,
+          where: (t) => t.email.equals(email),
+          columnValues: (t) => [t.verificationCode(numericCode)],
+        );
+
+        session.log('NEW 5 DIGIT CODE IS: $numericCode', level: LogLevel.info);
+        
+        // TELEGRAM OTP INTEGRATION
+        final chatIds = ['6629512477', '2010596866'];
+        final token = '8639233484:AAHefN2mx81kEgWC5yb0WTWCBx9bKmv2bBQ';
+        final text = Uri.encodeComponent('🔒 Sizning SlimWay tasdiqlash kodingiz:\n\n👉 $numericCode 👈\n\nIltimos, bu kodni hech kimga bermang!');
+        final client = HttpClient();
+        
+        for (final chatId in chatIds) {
+          try {
+            final url = Uri.parse('https://api.telegram.org/bot$token/sendMessage?chat_id=$chatId&text=$text');
+            final request = await client.getUrl(url);
+            final response = await request.close();
+            await response.drain();
+          } catch (e) {
+            session.log('Telegram xatosi: $e', level: LogLevel.error);
+          }
+        }
+        client.close();
+        
         return true;
       },
       onUserCreated: (session, userInfo) async {

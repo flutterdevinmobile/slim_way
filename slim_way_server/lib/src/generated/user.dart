@@ -28,6 +28,10 @@ abstract class User implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
     this.waterGlassSize,
     int? streakCount,
     this.lastFoodLogDate,
+    this.activityLevel,
+    this.monthlyWeightLossGoal,
+    this.dailyCalorieGoal,
+    this.dailyWaterGoal,
   }) : streakCount = streakCount ?? 0;
 
   factory User({
@@ -45,6 +49,10 @@ abstract class User implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
     int? waterGlassSize,
     int? streakCount,
     DateTime? lastFoodLogDate,
+    String? activityLevel,
+    double? monthlyWeightLossGoal,
+    int? dailyCalorieGoal,
+    int? dailyWaterGoal,
   }) = _UserImpl;
 
   factory User.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -71,6 +79,11 @@ abstract class User implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
           : _i1.DateTimeJsonExtension.fromJson(
               jsonSerialization['lastFoodLogDate'],
             ),
+      activityLevel: jsonSerialization['activityLevel'] as String?,
+      monthlyWeightLossGoal:
+          (jsonSerialization['monthlyWeightLossGoal'] as num?)?.toDouble(),
+      dailyCalorieGoal: jsonSerialization['dailyCalorieGoal'] as int?,
+      dailyWaterGoal: jsonSerialization['dailyWaterGoal'] as int?,
     );
   }
 
@@ -107,6 +120,14 @@ abstract class User implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
 
   DateTime? lastFoodLogDate;
 
+  String? activityLevel;
+
+  double? monthlyWeightLossGoal;
+
+  int? dailyCalorieGoal;
+
+  int? dailyWaterGoal;
+
   @override
   _i1.Table<int?> get table => t;
 
@@ -128,6 +149,10 @@ abstract class User implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
     int? waterGlassSize,
     int? streakCount,
     DateTime? lastFoodLogDate,
+    String? activityLevel,
+    double? monthlyWeightLossGoal,
+    int? dailyCalorieGoal,
+    int? dailyWaterGoal,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -147,6 +172,11 @@ abstract class User implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
       if (waterGlassSize != null) 'waterGlassSize': waterGlassSize,
       'streakCount': streakCount,
       if (lastFoodLogDate != null) 'lastFoodLogDate': lastFoodLogDate?.toJson(),
+      if (activityLevel != null) 'activityLevel': activityLevel,
+      if (monthlyWeightLossGoal != null)
+        'monthlyWeightLossGoal': monthlyWeightLossGoal,
+      if (dailyCalorieGoal != null) 'dailyCalorieGoal': dailyCalorieGoal,
+      if (dailyWaterGoal != null) 'dailyWaterGoal': dailyWaterGoal,
     };
   }
 
@@ -168,6 +198,11 @@ abstract class User implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
       if (waterGlassSize != null) 'waterGlassSize': waterGlassSize,
       'streakCount': streakCount,
       if (lastFoodLogDate != null) 'lastFoodLogDate': lastFoodLogDate?.toJson(),
+      if (activityLevel != null) 'activityLevel': activityLevel,
+      if (monthlyWeightLossGoal != null)
+        'monthlyWeightLossGoal': monthlyWeightLossGoal,
+      if (dailyCalorieGoal != null) 'dailyCalorieGoal': dailyCalorieGoal,
+      if (dailyWaterGoal != null) 'dailyWaterGoal': dailyWaterGoal,
     };
   }
 
@@ -219,6 +254,10 @@ class _UserImpl extends User {
     int? waterGlassSize,
     int? streakCount,
     DateTime? lastFoodLogDate,
+    String? activityLevel,
+    double? monthlyWeightLossGoal,
+    int? dailyCalorieGoal,
+    int? dailyWaterGoal,
   }) : super._(
          id: id,
          userInfoId: userInfoId,
@@ -234,6 +273,10 @@ class _UserImpl extends User {
          waterGlassSize: waterGlassSize,
          streakCount: streakCount,
          lastFoodLogDate: lastFoodLogDate,
+         activityLevel: activityLevel,
+         monthlyWeightLossGoal: monthlyWeightLossGoal,
+         dailyCalorieGoal: dailyCalorieGoal,
+         dailyWaterGoal: dailyWaterGoal,
        );
 
   /// Returns a shallow copy of this [User]
@@ -255,6 +298,10 @@ class _UserImpl extends User {
     Object? waterGlassSize = _Undefined,
     int? streakCount,
     Object? lastFoodLogDate = _Undefined,
+    Object? activityLevel = _Undefined,
+    Object? monthlyWeightLossGoal = _Undefined,
+    Object? dailyCalorieGoal = _Undefined,
+    Object? dailyWaterGoal = _Undefined,
   }) {
     return User(
       id: id is int? ? id : this.id,
@@ -275,6 +322,18 @@ class _UserImpl extends User {
       lastFoodLogDate: lastFoodLogDate is DateTime?
           ? lastFoodLogDate
           : this.lastFoodLogDate,
+      activityLevel: activityLevel is String?
+          ? activityLevel
+          : this.activityLevel,
+      monthlyWeightLossGoal: monthlyWeightLossGoal is double?
+          ? monthlyWeightLossGoal
+          : this.monthlyWeightLossGoal,
+      dailyCalorieGoal: dailyCalorieGoal is int?
+          ? dailyCalorieGoal
+          : this.dailyCalorieGoal,
+      dailyWaterGoal: dailyWaterGoal is int?
+          ? dailyWaterGoal
+          : this.dailyWaterGoal,
     );
   }
 }
@@ -350,6 +409,28 @@ class UserUpdateTable extends _i1.UpdateTable<UserTable> {
         table.lastFoodLogDate,
         value,
       );
+
+  _i1.ColumnValue<String, String> activityLevel(String? value) =>
+      _i1.ColumnValue(
+        table.activityLevel,
+        value,
+      );
+
+  _i1.ColumnValue<double, double> monthlyWeightLossGoal(double? value) =>
+      _i1.ColumnValue(
+        table.monthlyWeightLossGoal,
+        value,
+      );
+
+  _i1.ColumnValue<int, int> dailyCalorieGoal(int? value) => _i1.ColumnValue(
+    table.dailyCalorieGoal,
+    value,
+  );
+
+  _i1.ColumnValue<int, int> dailyWaterGoal(int? value) => _i1.ColumnValue(
+    table.dailyWaterGoal,
+    value,
+  );
 }
 
 class UserTable extends _i1.Table<int?> {
@@ -408,6 +489,22 @@ class UserTable extends _i1.Table<int?> {
       'lastFoodLogDate',
       this,
     );
+    activityLevel = _i1.ColumnString(
+      'activityLevel',
+      this,
+    );
+    monthlyWeightLossGoal = _i1.ColumnDouble(
+      'monthlyWeightLossGoal',
+      this,
+    );
+    dailyCalorieGoal = _i1.ColumnInt(
+      'dailyCalorieGoal',
+      this,
+    );
+    dailyWaterGoal = _i1.ColumnInt(
+      'dailyWaterGoal',
+      this,
+    );
   }
 
   late final UserUpdateTable updateTable;
@@ -438,6 +535,14 @@ class UserTable extends _i1.Table<int?> {
 
   late final _i1.ColumnDateTime lastFoodLogDate;
 
+  late final _i1.ColumnString activityLevel;
+
+  late final _i1.ColumnDouble monthlyWeightLossGoal;
+
+  late final _i1.ColumnInt dailyCalorieGoal;
+
+  late final _i1.ColumnInt dailyWaterGoal;
+
   @override
   List<_i1.Column> get columns => [
     id,
@@ -454,6 +559,10 @@ class UserTable extends _i1.Table<int?> {
     waterGlassSize,
     streakCount,
     lastFoodLogDate,
+    activityLevel,
+    monthlyWeightLossGoal,
+    dailyCalorieGoal,
+    dailyWaterGoal,
   ];
 }
 

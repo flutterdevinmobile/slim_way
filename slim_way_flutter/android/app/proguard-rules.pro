@@ -2,13 +2,6 @@
 -keep class io.flutter.** { *; }
 -keep class io.flutter.plugins.** { *; }
 
-# Serverpod serialization
--keep class com.serverpod.** { *; }
--keep class dev.serverpod.** { *; }
--keepclassmembers class * {
-    @com.google.gson.annotations.SerializedName <fields>;
-}
-
 # Hive
 -keep class com.hivedb.** { *; }
 

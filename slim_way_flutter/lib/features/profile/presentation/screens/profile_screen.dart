@@ -131,14 +131,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _buildStatItem('profile.stat_age'.tr(), '${user.age}'),
           ],
         ),
+        const SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            if (user.dailyCalorieGoal != null)
+              _buildStatItem('Kaloriya', '${user.dailyCalorieGoal} kcal', color: Colors.orange),
+            if (user.dailyCalorieGoal != null && user.dailyWaterGoal != null)
+              Container(width: 1, height: 40, color: Colors.grey.withValues(alpha: 0.2)),
+            if (user.dailyWaterGoal != null)
+              _buildStatItem("Suv me'yori", '${user.dailyWaterGoal} ml', color: Colors.blueAccent),
+          ],
+        ),
       ],
     );
   }
 
-  Widget _buildStatItem(String label, String value) {
+  Widget _buildStatItem(String label, String value, {Color color = AppTheme.green}) {
     return Column(
       children: [
-        Text(value, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: AppTheme.green)),
+        Text(value, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: color)),
         const SizedBox(height: 4),
         Text(label, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey)),
       ],
@@ -149,6 +161,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final nameCtrl = TextEditingController(text: user.name);
     final weightCtrl = TextEditingController(text: user.currentWeight.toString());
     final targetCtrl = TextEditingController(text: user.targetWeight.toString());
+    final monthlyCtrl = TextEditingController(text: user.monthlyWeightLossGoal?.toString() ?? '');
+    String activity = user.activityLevel ?? 'moderate';
 
     return Column(
       children: [
@@ -161,6 +175,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Expanded(child: _buildTextField(targetCtrl, 'profile.target'.tr(), Icons.flag_outlined, isNumeric: true)),
           ],
         ),
+        const SizedBox(height: 16),
+        _buildTextField(monthlyCtrl, '1 oydagi maqsad (kg)', Icons.trending_down_rounded, isNumeric: true),
+        const SizedBox(height: 16),
+        StatefulBuilder(
+          builder: (context, setInnerState) {
+            return Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                color: AppTheme.green.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: activity,
+                  isExpanded: true,
+                  dropdownColor: isDark ? const Color(0xFF1A1A1A) : Colors.white,
+                  items: const [
+                    DropdownMenuItem(value: 'sedentary', child: Text("Kam harakat")),
+                    DropdownMenuItem(value: 'light', child: Text("O'rtacha")),
+                    DropdownMenuItem(value: 'moderate', child: Text("Faol")),
+                    DropdownMenuItem(value: 'active', child: Text("Juda faol")),
+                  ],
+                  onChanged: (val) {
+                    if (val != null) setInnerState(() => activity = val);
+                  },
+                ),
+              ),
+            );
+          }
+        ),
         const SizedBox(height: 32),
         SizedBox(
           width: double.infinity,
@@ -170,6 +214,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               user.name = nameCtrl.text;
               user.currentWeight = double.tryParse(weightCtrl.text) ?? user.currentWeight;
               user.targetWeight = double.tryParse(targetCtrl.text) ?? user.targetWeight;
+              user.monthlyWeightLossGoal = double.tryParse(monthlyCtrl.text);
+              user.activityLevel = activity;
               context.read<AuthBloc>().add(AuthUserUpdateRequested(user));
               setState(() => _isEditing = false);
             },

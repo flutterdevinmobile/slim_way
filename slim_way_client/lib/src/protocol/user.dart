@@ -28,6 +28,10 @@ abstract class User implements _i1.SerializableModel {
     this.waterGlassSize,
     int? streakCount,
     this.lastFoodLogDate,
+    this.activityLevel,
+    this.monthlyWeightLossGoal,
+    this.dailyCalorieGoal,
+    this.dailyWaterGoal,
   }) : streakCount = streakCount ?? 0;
 
   factory User({
@@ -45,6 +49,10 @@ abstract class User implements _i1.SerializableModel {
     int? waterGlassSize,
     int? streakCount,
     DateTime? lastFoodLogDate,
+    String? activityLevel,
+    double? monthlyWeightLossGoal,
+    int? dailyCalorieGoal,
+    int? dailyWaterGoal,
   }) = _UserImpl;
 
   factory User.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -71,6 +79,11 @@ abstract class User implements _i1.SerializableModel {
           : _i1.DateTimeJsonExtension.fromJson(
               jsonSerialization['lastFoodLogDate'],
             ),
+      activityLevel: jsonSerialization['activityLevel'] as String?,
+      monthlyWeightLossGoal:
+          (jsonSerialization['monthlyWeightLossGoal'] as num?)?.toDouble(),
+      dailyCalorieGoal: jsonSerialization['dailyCalorieGoal'] as int?,
+      dailyWaterGoal: jsonSerialization['dailyWaterGoal'] as int?,
     );
   }
 
@@ -105,6 +118,14 @@ abstract class User implements _i1.SerializableModel {
 
   DateTime? lastFoodLogDate;
 
+  String? activityLevel;
+
+  double? monthlyWeightLossGoal;
+
+  int? dailyCalorieGoal;
+
+  int? dailyWaterGoal;
+
   /// Returns a shallow copy of this [User]
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
@@ -123,6 +144,10 @@ abstract class User implements _i1.SerializableModel {
     int? waterGlassSize,
     int? streakCount,
     DateTime? lastFoodLogDate,
+    String? activityLevel,
+    double? monthlyWeightLossGoal,
+    int? dailyCalorieGoal,
+    int? dailyWaterGoal,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -142,6 +167,11 @@ abstract class User implements _i1.SerializableModel {
       if (waterGlassSize != null) 'waterGlassSize': waterGlassSize,
       'streakCount': streakCount,
       if (lastFoodLogDate != null) 'lastFoodLogDate': lastFoodLogDate?.toJson(),
+      if (activityLevel != null) 'activityLevel': activityLevel,
+      if (monthlyWeightLossGoal != null)
+        'monthlyWeightLossGoal': monthlyWeightLossGoal,
+      if (dailyCalorieGoal != null) 'dailyCalorieGoal': dailyCalorieGoal,
+      if (dailyWaterGoal != null) 'dailyWaterGoal': dailyWaterGoal,
     };
   }
 
@@ -169,6 +199,10 @@ class _UserImpl extends User {
     int? waterGlassSize,
     int? streakCount,
     DateTime? lastFoodLogDate,
+    String? activityLevel,
+    double? monthlyWeightLossGoal,
+    int? dailyCalorieGoal,
+    int? dailyWaterGoal,
   }) : super._(
          id: id,
          userInfoId: userInfoId,
@@ -184,6 +218,10 @@ class _UserImpl extends User {
          waterGlassSize: waterGlassSize,
          streakCount: streakCount,
          lastFoodLogDate: lastFoodLogDate,
+         activityLevel: activityLevel,
+         monthlyWeightLossGoal: monthlyWeightLossGoal,
+         dailyCalorieGoal: dailyCalorieGoal,
+         dailyWaterGoal: dailyWaterGoal,
        );
 
   /// Returns a shallow copy of this [User]
@@ -205,6 +243,10 @@ class _UserImpl extends User {
     Object? waterGlassSize = _Undefined,
     int? streakCount,
     Object? lastFoodLogDate = _Undefined,
+    Object? activityLevel = _Undefined,
+    Object? monthlyWeightLossGoal = _Undefined,
+    Object? dailyCalorieGoal = _Undefined,
+    Object? dailyWaterGoal = _Undefined,
   }) {
     return User(
       id: id is int? ? id : this.id,
@@ -225,6 +267,18 @@ class _UserImpl extends User {
       lastFoodLogDate: lastFoodLogDate is DateTime?
           ? lastFoodLogDate
           : this.lastFoodLogDate,
+      activityLevel: activityLevel is String?
+          ? activityLevel
+          : this.activityLevel,
+      monthlyWeightLossGoal: monthlyWeightLossGoal is double?
+          ? monthlyWeightLossGoal
+          : this.monthlyWeightLossGoal,
+      dailyCalorieGoal: dailyCalorieGoal is int?
+          ? dailyCalorieGoal
+          : this.dailyCalorieGoal,
+      dailyWaterGoal: dailyWaterGoal is int?
+          ? dailyWaterGoal
+          : this.dailyWaterGoal,
     );
   }
 }
