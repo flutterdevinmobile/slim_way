@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 class BarcodeProduct {
@@ -22,12 +21,10 @@ class BarcodeProduct {
 
 class BarcodeService {
   static Future<BarcodeProduct?> getProductByBarcode(String barcode) async {
-    debugPrint('DEBUG: Scanning Barcode: $barcode');
     final url = Uri.parse('https://world.openfoodfacts.org/api/v2/product/$barcode.json');
-    
+
     try {
       final response = await http.get(url);
-      debugPrint('DEBUG: API Status Code: ${response.statusCode}');
       
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -61,14 +58,10 @@ class BarcodeService {
             imageUrl: product['image_url'] ?? product['image_front_url'],
           );
 
-          debugPrint('DEBUG: Product found: ${result.name}');
           return result;
-        } else {
-          debugPrint('DEBUG: Product not found in Open Food Facts database');
         }
       }
-    } catch (e) {
-      debugPrint('DEBUG: Barcode Service Error: $e');
+    } catch (_) {
     }
     return null;
   }

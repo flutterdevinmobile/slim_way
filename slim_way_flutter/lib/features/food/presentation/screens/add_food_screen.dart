@@ -54,8 +54,7 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
           if (response.statusCode == 200) {
             imageBytes = response.bodyBytes;
           }
-        } catch (e) {
-          debugPrint('Error downloading product image: $e');
+        } catch (_) {
         }
       }
 

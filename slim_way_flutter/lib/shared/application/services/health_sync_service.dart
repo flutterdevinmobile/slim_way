@@ -31,7 +31,7 @@ class HealthSyncService {
       final steps = await _health.getTotalStepsInInterval(startOfDay, now);
       return steps ?? 0;
     } catch (e) {
-      debugPrint('Error fetching steps from Health Connect: $e');
+      if (kDebugMode) debugPrint('HealthSyncService: $e');
       return 0;
     }
   }

@@ -1,4 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:slim_way_client/slim_way_client.dart';
 import 'package:serverpod_flutter/serverpod_flutter.dart';
@@ -15,8 +16,6 @@ import 'package:slim_way_flutter/features/home/data/datasources/summary_local_da
 import 'package:slim_way_flutter/shared/application/services/sync_service.dart';
 import 'package:slim_way_flutter/shared/application/services/sensor_sync_service.dart';
 
-
-
 import 'app.dart';
 import 'package:slim_way_flutter/features/auth/presentation/blocs/auth_bloc/auth_bloc.dart';
 import 'package:slim_way_flutter/features/home/presentation/blocs/summary_bloc/summary_bloc.dart';
@@ -31,7 +30,10 @@ late final Client client;
 late final SessionManager sessionManager;
 late final HiveAuthenticationKeyManager authKeyManager;
 
-const String _serverIp = String.fromEnvironment('SERVER_IP', defaultValue: 'slim-way-server.onrender.com');
+const String _serverIp = String.fromEnvironment(
+  'SERVER_IP',
+  defaultValue: 'slim-way-server.onrender.com',
+);
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,7 +41,10 @@ void main() async {
 
   final receivePort = ReceivePort();
   IsolateNameServer.removePortNameMapping(NotificationService.portName);
-  IsolateNameServer.registerPortWithName(receivePort.sendPort, NotificationService.portName);
+  IsolateNameServer.registerPortWithName(
+    receivePort.sendPort,
+    NotificationService.portName,
+  );
   receivePort.listen((message) {
     if (message is int) {
       NotificationService.relayUpdate(message);
@@ -50,7 +55,6 @@ void main() async {
   await SummaryLocalDataSourceImpl.init();
 
   // GoogleSignIn is handled by serverpod_auth_google_flutter internally
-
 
   authKeyManager = HiveAuthenticationKeyManager();
 
@@ -71,24 +75,14 @@ void main() async {
   );
 
   try {
-    debugPrint('DEBUG: SessionManager.initialize() starting...');
     await sessionManager.initialize();
-    debugPrint('DEBUG: SessionManager initialized. isSignedIn: ${sessionManager.isSignedIn}');
-    if (sessionManager.isSignedIn) {
-      debugPrint('DEBUG: Current User ID: ${sessionManager.signedInUser?.id}');
-    }
-    
     await NotificationService.initialize();
     await initDependencies();
-
-    // Start background sync
     sl<SyncService>().startAutoSync();
     await sl<SensorSyncService>().initialize();
-
   } catch (e) {
-    debugPrint('CRITICAL ERROR: Initialization failed: $e');
+    if (kDebugMode) debugPrint('Initialization failed: $e');
   }
-
 
   runApp(
     EasyLocalization(
@@ -99,14 +93,30 @@ void main() async {
       saveLocale: true,
       child: MultiBlocProvider(
         providers: [
-          BlocProvider(create: (_) => sl<SettingsBloc>()),
-          BlocProvider(create: (_) => sl<NavigationBloc>()),
-          BlocProvider(create: (_) => sl<AuthBloc>()..add(AuthInitRequested())),
-          BlocProvider(create: (_) => sl<SummaryBloc>()),
-          BlocProvider(create: (_) => sl<ActivityBloc>()),
-          BlocProvider(create: (_) => sl<FoodBloc>()),
-          BlocProvider(create: (_) => sl<StatsBloc>()),
-          BlocProvider(create: (_) => sl<ChatBloc>()),
+          BlocProvider(
+            create: (_) => sl<SettingsBloc>(),
+          ),
+          BlocProvider(
+            create: (_) => sl<NavigationBloc>(),
+          ),
+          BlocProvider(
+            create: (_) => sl<AuthBloc>()..add(AuthInitRequested()),
+          ),
+          BlocProvider(
+            create: (_) => sl<SummaryBloc>(),
+          ),
+          BlocProvider(
+            create: (_) => sl<ActivityBloc>(),
+          ),
+          BlocProvider(
+            create: (_) => sl<FoodBloc>(),
+          ),
+          BlocProvider(
+            create: (_) => sl<StatsBloc>(),
+          ),
+          BlocProvider(
+            create: (_) => sl<ChatBloc>(),
+          ),
         ],
         child: const MyApp(),
       ),

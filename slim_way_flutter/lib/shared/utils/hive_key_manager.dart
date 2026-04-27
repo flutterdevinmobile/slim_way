@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:serverpod_auth_shared_flutter/serverpod_auth_shared_flutter.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -7,7 +6,7 @@ class HiveAuthenticationKeyManager extends FlutterAuthenticationKeyManager {
   static const _keyName = 'auth_key';
 
   Box? _box;
-  
+
   Future<Box> _getBox() async {
     if (_box != null && _box!.isOpen) return _box!;
     _box = await Hive.openBox(_boxName);
@@ -19,37 +18,25 @@ class HiveAuthenticationKeyManager extends FlutterAuthenticationKeyManager {
     final box = await _getBox();
     final String? key = box.get(_keyName);
     final cleaned = _cleanKey(key);
-    debugPrint('DEBUG: HiveKeyManager.get() box:$_boxName, raw:|$key| -> clean:|$cleaned|');
     return cleaned;
   }
 
   @override
   Future<void> put(String key) async {
-    debugPrint('DEBUG: HiveKeyManager.put() CALLED with raw key: |$key|');
     final cleaned = _cleanKey(key);
-    if (cleaned == null) {
-      debugPrint('DEBUG: HiveKeyManager - KEY REJECTED: Validation failed for |$key|');
-      return;
-    }
-
+    if (cleaned == null) return;
     final box = await _getBox();
-    debugPrint('DEBUG: HiveKeyManager - Storing cleaned key: |$cleaned|');
-    
     await box.put(_keyName, cleaned);
-    debugPrint('DEBUG: HiveKeyManager - SUCCESS: Key stored in Hive box "$_boxName"');
   }
-
 
   @override
   Future<void> remove() async {
-    debugPrint('DEBUG: HiveKeyManager.remove()');
     final box = await _getBox();
     await box.delete(_keyName);
   }
 
   @override
   Future<String?> toHeaderValue([String? key]) async {
-    // Both get() and the parameter are now subject to cleaning
     final String? rawKey =
         (key != null && key.isNotEmpty)
         ? key
@@ -58,45 +45,32 @@ class HiveAuthenticationKeyManager extends FlutterAuthenticationKeyManager {
     final String? clean = _cleanKey(rawKey);
     if (clean == null) return null;
 
-    final header = 'Bearer $clean';
-    debugPrint('DEBUG: HiveKeyManager.toHeaderValue() -> |$header|');
-    return header;
+    return 'Bearer $clean';
   }
 
   String? _cleanKey(String? rawKey) {
     if (rawKey == null) return null;
 
-    // 1. Initial trim
     String cleaning = rawKey.trim();
 
-    // 2. EXPLICITLY strip "Bearer " if it's there (common source of 401/500 errors)
     if (cleaning.toLowerCase().startsWith('bearer ')) {
       cleaning = cleaning.substring(7).trim();
     }
 
-    // 3. Remove non-printable control chars and quotes
-    // Relaxed regex: Keep alphanumeric, common symbols used in base64/tokens
     final cleanKey = cleaning
         .replaceAll('"', '')
         .replaceAll("'", '')
-        .replaceAll(RegExp(r'\s+'), ''); // Only remove all whitespace
+        .replaceAll(RegExp(r'\s+'), '');
 
     if (cleanKey.isEmpty) return null;
 
-    // Validation: Expect "id:key"
     final colonIndex = cleanKey.indexOf(':');
     if (colonIndex <= 0 || colonIndex == cleanKey.length - 1) {
-      debugPrint(
-        'WARNING: HiveKeyManager - Key format unexpected (no colon), returning raw: |$cleanKey|',
-      );
       return cleanKey;
     }
 
     final idPart = cleanKey.substring(0, colonIndex);
     if (int.tryParse(idPart) == null) {
-      debugPrint(
-        'DEBUG: HiveKeyManager - Malformed key (ID not integer): |$cleanKey|',
-      );
       return null;
     }
 

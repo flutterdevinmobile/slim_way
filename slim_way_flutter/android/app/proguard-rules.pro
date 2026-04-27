@@ -1,18 +1,23 @@
-# Serverpod serialization needs these
--keep class com.slim_way.client.protocol.** { *; }
--keep class com.serverpod.auth.client.** { *; }
--keep class com.serverpod.client.** { *; }
-
-# Keep models from being obfuscated
--keepclassmembers class * extends com.serverpod.serialization.SerializableEntity {
-    <fields>;
-    <methods>;
-}
-
-# Flutter specific
--keep class io.flutter.app.** { *; }
--keep class io.flutter.plugin.** { *; }
--keep class io.flutter.util.** { *; }
--keep class io.flutter.view.** { *; }
+# Flutter
 -keep class io.flutter.** { *; }
 -keep class io.flutter.plugins.** { *; }
+
+# Serverpod serialization
+-keep class com.serverpod.** { *; }
+-keep class dev.serverpod.** { *; }
+-keepclassmembers class * {
+    @com.google.gson.annotations.SerializedName <fields>;
+}
+
+# Hive
+-keep class com.hivedb.** { *; }
+
+# Google Sign-In
+-keep class com.google.android.gms.auth.** { *; }
+-keep class com.google.android.gms.common.** { *; }
+
+# Health Connect
+-keep class androidx.health.connect.** { *; }
+
+# Keep Dart entry points
+-keep class **.GeneratedPluginRegistrant { *; }

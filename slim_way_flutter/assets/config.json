@@ -1,3 +1,5 @@
 {
-    "apiUrl": "https://slim-way-server.onrender.com"
+    "apiUrl": "https://slim-way-server.onrender.com",
+    "googleServerClientId": "437511136009-pddn35icihv85ujqrhu3afik6k35l74b.apps.googleusercontent.com",
+    "googleRedirectUri": "https://slim-way-server.onrender.com/googlesignin"
 }

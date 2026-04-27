@@ -14,8 +14,7 @@ class ImageUtils {
             ? url.split(',').last.replaceAll(RegExp(r'\s+'), '')
             : url.replaceAll(RegExp(r'\s+'), '');
         return MemoryImage(base64Decode(base64String));
-      } catch (e) {
-        debugPrint('Error decoding base64 image: $e');
+      } catch (_) {
         return null;
       }
     }

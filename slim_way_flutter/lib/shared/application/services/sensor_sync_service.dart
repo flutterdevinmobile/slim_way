@@ -45,7 +45,7 @@ class SensorSyncService {
   }
 
   void _onStepCountError(Object error) {
-    debugPrint('SensorSyncService: Pedometer Error: $error');
+    if (kDebugMode) debugPrint('SensorSyncService: $error');
   }
 
   String _getTodayKey() {

@@ -235,7 +235,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Icons.dark_mode_rounded,
           Switch(
             value: isDark,
-            activeThumbColor: AppTheme.green,
+            activeColor: AppTheme.green,
             onChanged: (v) => context.read<SettingsBloc>().add(ThemeToggled()),
           ),
         ),
