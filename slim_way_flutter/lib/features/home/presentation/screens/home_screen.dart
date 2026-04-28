@@ -12,6 +12,8 @@ import 'package:slim_way_flutter/shared/presentation/blocs/navigation_bloc/navig
 
 import 'package:slim_way_flutter/shared/utils/image_utils.dart';
 import 'package:slim_way_flutter/shared/utils/date_time_utils.dart';
+import 'package:slim_way_flutter/shared/application/configs/di/injection_container.dart';
+import 'package:slim_way_flutter/shared/application/services/sensor_sync_service.dart';
 import 'package:slim_way_flutter/shared/utils/user_utils.dart';
 import '../widgets/modern_summary_card.dart';
 import '../widgets/water_tracker_card.dart';
@@ -186,10 +188,22 @@ class _HomeScreenState extends State<HomeScreen> {
                                         .add(WaterAdded(val)),
                                   ),
                                   SizedBox(height: 32.h),
-                                  PedometerCard(
-                                    steps: totalSteps,
-                                    goal: 8000,
-                                    onRefresh: () => context.read<ActivityBloc>().add(const ActivityHistoryRefreshRequested()),
+                                  StreamBuilder<int>(
+                                    stream: sl<SensorSyncService>().stepStream,
+                                    builder: (context, snapshot) {
+                                      // Agar stream'da yangi qadamlar kelib tushsa uni olamiz, bo'lmasa eski totalSteps ishlataveramiz.
+                                      final currentSteps = snapshot.data ?? totalSteps;
+                                      final displaySteps = currentSteps > totalSteps ? currentSteps : totalSteps;
+                                      
+                                      return PedometerCard(
+                                        steps: displaySteps,
+                                        goal: 8000,
+                                        onRefresh: () {
+                                          context.read<ActivityBloc>().add(const ActivityHistoryRefreshRequested());
+                                          context.read<SummaryBloc>().add(SummaryRefreshRequested());
+                                        },
+                                      );
+                                    }
                                   ),
                                   SizedBox(height: 100.h),
                                 ],

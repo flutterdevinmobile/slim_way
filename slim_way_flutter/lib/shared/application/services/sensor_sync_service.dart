@@ -30,6 +30,8 @@ class SensorSyncService {
     final today = _getTodayKey();
     
     final box = await Hive.openBox(_boxName);
+    await box.put('last_known_total', _lastKnownTotal);
+    
     int? baseSteps = box.get(_keyBaseSteps + today);
     
     if (baseSteps == null) {
@@ -54,10 +56,15 @@ class SensorSyncService {
   }
 
   Future<int> getTodaySteps() async {
+    final box = await Hive.openBox(_boxName);
+    
+    if (_lastKnownTotal == 0) {
+      _lastKnownTotal = box.get('last_known_total') ?? 0;
+    }
+
     if (_lastKnownTotal == 0) return 0;
     
     final today = _getTodayKey();
-    final box = await Hive.openBox(_boxName);
     int? baseSteps = box.get(_keyBaseSteps + today);
     
     if (baseSteps == null) return 0;
