@@ -30,15 +30,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
           builder: (context, authState) {
             final user = authState.whenOrNull(authenticated: (u) => u);
             if (user == null) {
-              return const Scaffold(body: Center(child: CircularProgressIndicator(color: AppTheme.green)));
+              return const Scaffold(
+                body: Center(
+                  child: CircularProgressIndicator(color: AppTheme.green),
+                ),
+              );
             }
 
             return Scaffold(
               appBar: AppBar(
-                title: Text('profile.title'.tr(), style: const TextStyle(fontWeight: FontWeight.bold)),
+                title: Text(
+                  'profile.title'.tr(),
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
                 actions: [
                   IconButton(
-                    icon: Icon(_isEditing ? Icons.close_rounded : Icons.edit_note_rounded, color: AppTheme.green),
+                    icon: Icon(
+                      _isEditing
+                          ? Icons.close_rounded
+                          : Icons.edit_note_rounded,
+                      color: AppTheme.green,
+                    ),
                     onPressed: () => setState(() => _isEditing = !_isEditing),
                   ),
                 ],
@@ -50,8 +62,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     const SizedBox(height: 24),
                     _buildProfileHeader(user, isDark),
                     const SizedBox(height: 40),
-                    _isEditing 
-                        ? _buildEditForm(user, isDark) 
+                    _isEditing
+                        ? _buildEditForm(user, isDark)
                         : _buildProfileInfo(user, isDark),
                     const SizedBox(height: 48),
                     _buildSettingsGrid(settingsState, isDark),
@@ -82,13 +94,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: AppTheme.green.withValues(alpha: 0.2), width: 3),
+              border: Border.all(
+                color: AppTheme.green.withValues(alpha: 0.2),
+                width: 3,
+              ),
             ),
             child: CircleAvatar(
               radius: 64,
-              backgroundColor: isDark ? AppTheme.darkGray : Colors.grey.shade200,
+              backgroundColor: isDark
+                  ? AppTheme.darkGray
+                  : Colors.grey.shade200,
               backgroundImage: imageProvider,
-              child: imageProvider == null ? const Icon(Icons.person_rounded, size: 60, color: AppTheme.green) : null,
+              child: imageProvider == null
+                  ? const Icon(
+                      Icons.person_rounded,
+                      size: 60,
+                      color: AppTheme.green,
+                    )
+                  : null,
             ),
           ),
           if (_isEditing)
@@ -96,8 +119,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
               onTap: () => _pickImage(user),
               child: Container(
                 padding: const EdgeInsets.all(10),
-                decoration: const BoxDecoration(color: AppTheme.green, shape: BoxShape.circle),
-                child: const Icon(Icons.camera_alt_rounded, size: 20, color: Colors.white),
+                decoration: const BoxDecoration(
+                  color: AppTheme.green,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.camera_alt_rounded,
+                  size: 20,
+                  color: Colors.white,
+                ),
               ),
             ),
         ],
@@ -106,7 +136,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _pickImage(User user) async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.gallery, maxWidth: 400, maxHeight: 400, imageQuality: 60);
+    final pickedFile = await _picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 400,
+      maxHeight: 400,
+      imageQuality: 60,
+    );
     if (pickedFile != null && mounted) {
       final bytes = await pickedFile.readAsBytes();
       user.photoUrl = 'data:image/jpeg;base64,${base64Encode(bytes)}';
@@ -119,15 +154,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildProfileInfo(User user, bool isDark) {
     return Column(
       children: [
-        Text(user.name, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w900, letterSpacing: -0.5)),
+        Text(
+          user.name,
+          style: const TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.w900,
+            letterSpacing: -0.5,
+          ),
+        ),
         const SizedBox(height: 32),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             _buildStatItem('profile.stat_weight'.tr(), '${user.currentWeight}'),
-            Container(width: 1, height: 40, color: Colors.grey.withValues(alpha: 0.2)),
+            Container(
+              width: 1,
+              height: 40,
+              color: Colors.grey.withValues(alpha: 0.2),
+            ),
             _buildStatItem('profile.stat_goal'.tr(), '${user.targetWeight}'),
-            Container(width: 1, height: 40, color: Colors.grey.withValues(alpha: 0.2)),
+            Container(
+              width: 1,
+              height: 40,
+              color: Colors.grey.withValues(alpha: 0.2),
+            ),
             _buildStatItem('profile.stat_age'.tr(), '${user.age}'),
           ],
         ),
@@ -136,47 +186,106 @@ class _ProfileScreenState extends State<ProfileScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             if (user.dailyCalorieGoal != null)
-              _buildStatItem('Kaloriya', '${user.dailyCalorieGoal} kcal', color: Colors.orange),
+              _buildStatItem(
+                'Kaloriya',
+                '${user.dailyCalorieGoal} kcal',
+                color: Colors.orange,
+              ),
             if (user.dailyCalorieGoal != null && user.dailyWaterGoal != null)
-              Container(width: 1, height: 40, color: Colors.grey.withValues(alpha: 0.2)),
+              Container(
+                width: 1,
+                height: 40,
+                color: Colors.grey.withValues(alpha: 0.2),
+              ),
             if (user.dailyWaterGoal != null)
-              _buildStatItem("Suv me'yori", '${user.dailyWaterGoal} ml', color: Colors.blueAccent),
+              _buildStatItem(
+                "Suv me'yori",
+                '${user.dailyWaterGoal} ml',
+                color: Colors.blueAccent,
+              ),
           ],
         ),
       ],
     );
   }
 
-  Widget _buildStatItem(String label, String value, {Color color = AppTheme.green}) {
+  Widget _buildStatItem(
+    String label,
+    String value, {
+    Color color = AppTheme.green,
+  }) {
     return Column(
       children: [
-        Text(value, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: color)),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w900,
+            color: color,
+          ),
+        ),
         const SizedBox(height: 4),
-        Text(label, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey)),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+            color: Colors.grey,
+          ),
+        ),
       ],
     );
   }
 
   Widget _buildEditForm(User user, bool isDark) {
     final nameCtrl = TextEditingController(text: user.name);
-    final weightCtrl = TextEditingController(text: user.currentWeight.toString());
-    final targetCtrl = TextEditingController(text: user.targetWeight.toString());
-    final monthlyCtrl = TextEditingController(text: user.monthlyWeightLossGoal?.toString() ?? '');
+    final weightCtrl = TextEditingController(
+      text: user.currentWeight.toString(),
+    );
+    final targetCtrl = TextEditingController(
+      text: user.targetWeight.toString(),
+    );
+    final monthlyCtrl = TextEditingController(
+      text: user.monthlyWeightLossGoal?.toString() ?? '',
+    );
     String activity = user.activityLevel ?? 'moderate';
 
     return Column(
       children: [
-        _buildTextField(nameCtrl, 'profile.full_name'.tr(), Icons.person_outline_rounded),
+        _buildTextField(
+          nameCtrl,
+          'profile.full_name'.tr(),
+          Icons.person_outline_rounded,
+        ),
         const SizedBox(height: 16),
         Row(
           children: [
-            Expanded(child: _buildTextField(weightCtrl, 'profile.weight'.tr(), Icons.monitor_weight_outlined, isNumeric: true)),
+            Expanded(
+              child: _buildTextField(
+                weightCtrl,
+                'profile.weight'.tr(),
+                Icons.monitor_weight_outlined,
+                isNumeric: true,
+              ),
+            ),
             const SizedBox(width: 16),
-            Expanded(child: _buildTextField(targetCtrl, 'profile.target'.tr(), Icons.flag_outlined, isNumeric: true)),
+            Expanded(
+              child: _buildTextField(
+                targetCtrl,
+                'profile.target'.tr(),
+                Icons.flag_outlined,
+                isNumeric: true,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 16),
-        _buildTextField(monthlyCtrl, '1 oydagi maqsad (kg)', Icons.trending_down_rounded, isNumeric: true),
+        _buildTextField(
+          monthlyCtrl,
+          '1 oydagi maqsad (kg)',
+          Icons.trending_down_rounded,
+          isNumeric: true,
+        ),
         const SizedBox(height: 16),
         StatefulBuilder(
           builder: (context, setInnerState) {
@@ -190,9 +299,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: DropdownButton<String>(
                   value: activity,
                   isExpanded: true,
-                  dropdownColor: isDark ? const Color(0xFF1A1A1A) : Colors.white,
+                  dropdownColor: isDark
+                      ? const Color(0xFF1A1A1A)
+                      : Colors.white,
                   items: const [
-                    DropdownMenuItem(value: 'sedentary', child: Text("Kam harakat")),
+                    DropdownMenuItem(
+                      value: 'sedentary',
+                      child: Text("Kam harakat"),
+                    ),
                     DropdownMenuItem(value: 'light', child: Text("O'rtacha")),
                     DropdownMenuItem(value: 'moderate', child: Text("Faol")),
                     DropdownMenuItem(value: 'active', child: Text("Juda faol")),
@@ -203,7 +317,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
             );
-          }
+          },
         ),
         const SizedBox(height: 32),
         SizedBox(
@@ -212,8 +326,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           child: ElevatedButton(
             onPressed: () {
               user.name = nameCtrl.text;
-              user.currentWeight = double.tryParse(weightCtrl.text) ?? user.currentWeight;
-              user.targetWeight = double.tryParse(targetCtrl.text) ?? user.targetWeight;
+              user.currentWeight =
+                  double.tryParse(weightCtrl.text) ?? user.currentWeight;
+              user.targetWeight =
+                  double.tryParse(targetCtrl.text) ?? user.targetWeight;
               user.monthlyWeightLossGoal = double.tryParse(monthlyCtrl.text);
               user.activityLevel = activity;
               context.read<AuthBloc>().add(AuthUserUpdateRequested(user));
@@ -226,7 +342,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildTextField(TextEditingController ctrl, String label, IconData icon, {bool isNumeric = false}) {
+  Widget _buildTextField(
+    TextEditingController ctrl,
+    String label,
+    IconData icon, {
+    bool isNumeric = false,
+  }) {
     return TextField(
       controller: ctrl,
       keyboardType: isNumeric ? TextInputType.number : TextInputType.text,
@@ -235,7 +356,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         prefixIcon: Icon(icon, size: 20, color: AppTheme.green),
         filled: true,
         fillColor: AppTheme.green.withValues(alpha: 0.05),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(20),
+          borderSide: BorderSide.none,
+        ),
       ),
     );
   }
@@ -258,15 +382,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 },
                 child: Container(
                   margin: const EdgeInsets.only(left: 8),
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: isSel ? AppTheme.green : Colors.transparent,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: isSel ? AppTheme.green : Colors.grey.withValues(alpha: 0.3)),
+                    border: Border.all(
+                      color: isSel
+                          ? AppTheme.green
+                          : Colors.grey.withValues(alpha: 0.3),
+                    ),
                   ),
-                  child: Text(l.toUpperCase(), style: TextStyle(
-                    fontSize: 10, fontWeight: FontWeight.bold, color: isSel ? Colors.white : Colors.grey
-                  )),
+                  child: Text(
+                    l.toUpperCase(),
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: isSel ? Colors.white : Colors.grey,
+                    ),
+                  ),
                 ),
               );
             }).toList(),
@@ -275,13 +411,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         const SizedBox(height: 16),
         _buildSettingTile(
           'profile.appearance'.tr(),
-          isDark 
-              ? '${'profile.dark_mode'.tr()} ${'profile.active'.tr()}' 
+          isDark
+              ? '${'profile.dark_mode'.tr()} ${'profile.active'.tr()}'
               : '${'profile.light_mode'.tr()} ${'profile.active'.tr()}',
           Icons.dark_mode_rounded,
           Switch(
             value: isDark,
-            activeThumbColor: AppTheme.green,
+            activeTrackColor: AppTheme.green,
             onChanged: (v) => context.read<SettingsBloc>().add(ThemeToggled()),
           ),
         ),
@@ -289,7 +425,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildSettingTile(String title, String subtitle, IconData icon, Widget trailing) {
+  Widget _buildSettingTile(
+    String title,
+    String subtitle,
+    IconData icon,
+    Widget trailing,
+  ) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(20),
@@ -302,7 +443,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: [
           Container(
             padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(color: AppTheme.green.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(16)),
+            decoration: BoxDecoration(
+              color: AppTheme.green.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(16),
+            ),
             child: Icon(icon, color: AppTheme.green, size: 24),
           ),
           const SizedBox(width: 16),
@@ -310,8 +454,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                Text(subtitle, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                Text(
+                  subtitle,
+                  style: const TextStyle(color: Colors.grey, fontSize: 12),
+                ),
               ],
             ),
           ),
@@ -394,15 +547,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
         decoration: BoxDecoration(
           gradient: isEarned
               ? LinearGradient(
-                  colors: [AppTheme.green.withValues(alpha: 0.2), AppTheme.green.withValues(alpha: 0.05)],
+                  colors: [
+                    AppTheme.green.withValues(alpha: 0.2),
+                    AppTheme.green.withValues(alpha: 0.05),
+                  ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 )
               : null,
-          color: isEarned ? null : (isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.withValues(alpha: 0.05)),
+          color: isEarned
+              ? null
+              : (isDark
+                    ? Colors.white.withValues(alpha: 0.05)
+                    : Colors.grey.withValues(alpha: 0.05)),
           borderRadius: BorderRadius.circular(28),
           border: Border.all(
-            color: isEarned ? AppTheme.green.withValues(alpha: 0.3) : Colors.transparent,
+            color: isEarned
+                ? AppTheme.green.withValues(alpha: 0.3)
+                : Colors.transparent,
             width: 1.5,
           ),
           boxShadow: isEarned
@@ -411,7 +573,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     color: AppTheme.green.withValues(alpha: 0.1),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
-                  )
+                  ),
                 ]
               : null,
         ),
@@ -421,12 +583,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: isEarned ? Colors.white : Colors.grey.withValues(alpha: 0.1),
+                color: isEarned
+                    ? Colors.white
+                    : Colors.grey.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Text(
                 icon,
-                style: TextStyle(fontSize: 24, color: isEarned ? null : Colors.grey.withValues(alpha: 0.5)),
+                style: TextStyle(
+                  fontSize: 24,
+                  color: isEarned ? null : Colors.grey.withValues(alpha: 0.5),
+                ),
               ),
             ),
             const SizedBox(height: 12),
@@ -438,7 +605,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w800,
-                color: isEarned ? (isDark ? Colors.white : Colors.black87) : Colors.grey,
+                color: isEarned
+                    ? (isDark ? Colors.white : Colors.black87)
+                    : Colors.grey,
               ),
             ),
           ],
@@ -447,7 +616,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  void _showAchievementDetails(String icon, String name, String desc, bool isEarned) {
+  void _showAchievementDetails(
+    String icon,
+    String name,
+    String desc,
+    bool isEarned,
+  ) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -475,7 +649,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: (isEarned ? AppTheme.green : Colors.grey).withValues(alpha: 0.1),
+                  color: (isEarned ? AppTheme.green : Colors.grey).withValues(
+                    alpha: 0.1,
+                  ),
                   shape: BoxShape.circle,
                 ),
                 child: Text(icon, style: const TextStyle(fontSize: 48)),
@@ -483,18 +659,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const SizedBox(height: 24),
               Text(
                 name,
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900),
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w900,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 12),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
-                  color: (isEarned ? AppTheme.green : Colors.orange).withValues(alpha: 0.1),
+                  color: (isEarned ? AppTheme.green : Colors.orange).withValues(
+                    alpha: 0.1,
+                  ),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  isEarned ? 'achievements.earned'.tr() : 'achievements.locked'.tr(),
+                  isEarned
+                      ? 'achievements.earned'.tr()
+                      : 'achievements.locked'.tr(),
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w900,
@@ -506,7 +692,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const SizedBox(height: 32),
               Text(
                 'achievements.how_to'.tr(),
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey),
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey,
+                ),
               ),
               const SizedBox(height: 12),
               Text(
@@ -521,8 +711,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: ElevatedButton(
                   onPressed: () => Navigator.pop(context),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: isEarned ? AppTheme.green : Colors.grey.shade800,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    backgroundColor: isEarned
+                        ? AppTheme.green
+                        : Colors.grey.shade800,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
                   ),
                   child: Text('common.great'.tr()),
                 ),
@@ -534,12 +728,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-
   Widget _buildLogoutButton() {
     return TextButton.icon(
       onPressed: () => context.read<AuthBloc>().add(AuthLogoutRequested()),
       icon: const Icon(Icons.logout_rounded, color: Colors.redAccent),
-      label: Text('profile.logout'.tr(), style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+      label: Text(
+        'profile.logout'.tr(),
+        style: const TextStyle(
+          color: Colors.redAccent,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
     );
   }
 }
