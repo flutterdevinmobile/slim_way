@@ -10,6 +10,10 @@ import 'package:slim_way_flutter/features/activity/presentation/screens/walk_log
 import 'package:slim_way_flutter/features/profile/presentation/screens/profile_screen.dart';
 import 'package:slim_way_flutter/features/chat/presentation/screens/chat_screen.dart';
 
+import 'package:slim_way_flutter/features/auth/presentation/blocs/auth_bloc/auth_bloc.dart';
+import 'package:slim_way_flutter/features/home/presentation/blocs/summary_bloc/summary_bloc.dart';
+import 'package:slim_way_flutter/features/activity/presentation/blocs/activity_bloc/activity_bloc.dart';
+
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
 
@@ -17,7 +21,7 @@ class MainScreen extends StatefulWidget {
   State<MainScreen> createState() => _MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   final List<Widget> _screens = [
     const HomeScreen(),
     const FoodHistoryScreen(),
@@ -25,6 +29,28 @@ class _MainScreenState extends State<MainScreen> {
     const WalkLogScreen(),
     const ProfileScreen(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      if (context.read<AuthBloc>().state is AuthAuthenticated) {
+        context.read<ActivityBloc>().add(const ActivityHistoryRefreshRequested());
+        context.read<SummaryBloc>().add(SummaryRefreshRequested());
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
