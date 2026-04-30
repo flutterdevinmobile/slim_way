@@ -71,7 +71,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
             }
             */
           },
+          needsSetup: (_) {
+            Navigator.of(context).pop();
+          },
           authenticated: (_) {
+            Navigator.of(context).pop();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text('auth.verified_success'.tr()),
