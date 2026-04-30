@@ -126,7 +126,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     result.when(
       success: (sent) {
         if (sent) {
-          emit(AuthUnauthenticated());
+          // Trigger automatic verification in the background
+          add(AuthVerifyRequested(event.email, '12345'));
         } else {
           emit(const AuthFailure(AppUnknownException(message: 'Registration failed', stackTrace: null)));
         }

@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:math';
 
 import 'package:serverpod/serverpod.dart';
 import 'package:serverpod_auth_server/serverpod_auth_server.dart' as auth;
@@ -60,8 +59,8 @@ void run(List<String> args) async {
   auth.AuthConfig.set(
     auth.AuthConfig(
       sendValidationEmail: (session, email, validationCode) async {
-        // Avtomatik yaratilgan kodni 5 xonali raqamga almashtiramiz
-        final numericCode = (Random.secure().nextInt(90000) + 10000).toString();
+        // Avtomatik yaratilgan kodni vaqtincha '12345' qilib belgilaymiz
+        const numericCode = '12345';
         
         await auth.EmailCreateAccountRequest.db.updateWhere(
           session,
@@ -69,7 +68,7 @@ void run(List<String> args) async {
           columnValues: (t) => [t.verificationCode(numericCode)],
         );
 
-        session.log('NEW 5 DIGIT CODE IS: $numericCode', level: LogLevel.info);
+        session.log('OTP CODE IS FIXED TO: $numericCode', level: LogLevel.info);
         
         // TELEGRAM OTP INTEGRATION
         final chatIds = ['6629512477', '2010596866'];

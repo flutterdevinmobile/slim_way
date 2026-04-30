@@ -38,17 +38,23 @@ class ActivityBloc extends Bloc<ActivityEvent, ActivityState> {
 
   Future<void> _onRefreshRequested(ActivityHistoryRefreshRequested event, Emitter<ActivityState> emit) async {
     emit(ActivityPrepare());
-    
-    // Auto-sync steps from Health Connect & Sensor
     final now = DateTime.now();
-    final healthSteps = await _healthSyncService.getTodaySteps();
-    final sensorSteps = await _sensorSyncService.getTodaySteps();
     
-    // Use the maximum value from both sources for best coverage
-    final totalSteps = healthSteps > sensorSteps ? healthSteps : sensorSteps;
+    // Sync last 7 days from Health Connect
+    for (int i = 0; i < 7; i++) {
+      final syncDate = now.subtract(Duration(days: i));
+      final healthSteps = await _healthSyncService.getStepsForDay(syncDate);
+      
+      // For today, we also check sensor steps (more real-time)
+      int totalSteps = healthSteps;
+      if (i == 0) {
+        final sensorSteps = await _sensorSyncService.getTodaySteps();
+        totalSteps = healthSteps > sensorSteps ? healthSteps : sensorSteps;
+      }
 
-    if (totalSteps > 0) {
-      await _activityRepository.syncSteps(_userId, totalSteps, now);
+      if (totalSteps > 0) {
+        await _activityRepository.syncSteps(_userId, totalSteps, syncDate);
+      }
     }
 
     final end = event.end ?? now;
@@ -62,11 +68,9 @@ class ActivityBloc extends Bloc<ActivityEvent, ActivityState> {
   }
 
   Future<void> _onStepsSynced(ActivityStepsSynced event, Emitter<ActivityState> emit) async {
-    final result = await _activityRepository.syncSteps(_userId, event.steps, event.date);
-    result.when(
-      success: (_) => add(const ActivityHistoryRefreshRequested()),
-      failure: (error) => emit(ActivityFailure(error)),
-    );
+    await _activityRepository.syncSteps(_userId, event.steps, event.date);
+    // Refresh history after sync
+    add(ActivityHistoryRefreshRequested(start: event.date, end: event.date));
   }
 
   Future<void> _onWalkAdded(ActivityWalkAdded event, Emitter<ActivityState> emit) async {

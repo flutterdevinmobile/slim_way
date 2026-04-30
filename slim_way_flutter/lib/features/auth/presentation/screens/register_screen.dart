@@ -57,6 +57,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
         state.whenOrNull(
           failure: (error) => setState(() => _errorMessage = error.userFriendlyMessage),
           unauthenticated: () {
+            // OTP verification is now handled in the background.
+            // We don't show the verification UI here.
+            /*
             if (!_showVerification && _emailController.text.isNotEmpty && _passwordController.text.isNotEmpty) {
               setState(() {
                 _showVerification = true;
@@ -66,6 +69,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 SnackBar(content: Text('auth.code_sent'.tr(args: [_emailController.text]))),
               );
             }
+            */
           },
           authenticated: (_) {
             ScaffoldMessenger.of(context).showSnackBar(

@@ -82,19 +82,24 @@ class NotificationService {
   static Future<void> scheduleWaterReminders(int totalConsumedMl) async {
     await _notificationsPlugin.cancelAll();
 
-    const int goalClasses = 10;
-    final int glassesConsumed = totalConsumedMl ~/ 250;
-
-    if (glassesConsumed >= goalClasses) return;
-
+    const int goalGlasses = 10;
     final now = DateTime.now();
-    final baseDate = DateTime(now.year, now.month, now.day, 8, 0);
 
-    for (int i = glassesConsumed; i < goalClasses; i++) {
-      DateTime slotTime = baseDate.add(Duration(minutes: i * 80));
-      if (slotTime.isAfter(now)) {
-        _scheduleNotificationForSlot(i + 100, slotTime, isFollowUp: false);
-        _scheduleNotificationForSlot(i + 200, slotTime.add(const Duration(minutes: 10)), isFollowUp: true);
+    for (int dayOffset = 0; dayOffset < 7; dayOffset++) {
+      final scheduleDate = now.add(Duration(days: dayOffset));
+      final baseDate = DateTime(scheduleDate.year, scheduleDate.month, scheduleDate.day, 8, 0);
+      
+      // Only for today we use the actual consumption. For future days, we start from 0.
+      final int glassesConsumed = dayOffset == 0 ? totalConsumedMl ~/ 250 : 0;
+      if (glassesConsumed >= goalGlasses) continue;
+
+      for (int i = glassesConsumed; i < goalGlasses; i++) {
+        DateTime slotTime = baseDate.add(Duration(minutes: i * 80));
+        if (slotTime.isAfter(now)) {
+          // Unique ID: dayOffset * 1000 + i + channel_offset
+          _scheduleNotificationForSlot(dayOffset * 1000 + i + 100, slotTime, isFollowUp: false);
+          _scheduleNotificationForSlot(dayOffset * 1000 + i + 500, slotTime.add(const Duration(minutes: 10)), isFollowUp: true);
+        }
       }
     }
   }

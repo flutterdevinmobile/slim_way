@@ -20,19 +20,23 @@ class HealthSyncService {
   }
 
 
-  Future<int> getTodaySteps() async {
+  Future<int> getStepsForDay(DateTime date) async {
     bool authorized = await requestPermissions();
     if (!authorized) return 0;
 
-    final now = DateTime.now();
-    final startOfDay = DateTime(now.year, now.month, now.day);
+    final startOfDay = DateTime(date.year, date.month, date.day);
+    final endOfDay = startOfDay.add(const Duration(days: 1));
 
     try {
-      final steps = await _health.getTotalStepsInInterval(startOfDay, now);
+      final steps = await _health.getTotalStepsInInterval(startOfDay, endOfDay);
       return steps ?? 0;
     } catch (e) {
       if (kDebugMode) debugPrint('HealthSyncService: $e');
       return 0;
     }
+  }
+
+  Future<int> getTodaySteps() async {
+    return getStepsForDay(DateTime.now());
   }
 }

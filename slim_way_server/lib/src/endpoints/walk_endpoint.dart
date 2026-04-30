@@ -22,41 +22,52 @@ class WalkEndpoint extends Endpoint {
   }
 
   Future<void> syncSteps(Session session, int userId, int newSteps, DateTime date) async {
-    var utcDate = date.toUtc();
-    var startOfDay = DateTime.utc(utcDate.year, utcDate.month, utcDate.day);
+    // 1. Identify the calendar day based on client's local components
+    var startOfDay = DateTime.utc(date.year, date.month, date.day);
     var endOfDay = startOfDay.add(const Duration(days: 1));
 
-    var autoWalk = await Walk.db.findFirstRow(
+    // 2. Find ALL automatic walk records for this day (to handle/clean existing duplicates)
+    var autoWalks = await Walk.db.find(
       session,
       where: (t) =>
           t.userId.equals(userId) &
           (t.createdAt >= startOfDay) &
           (t.createdAt < endOfDay) &
-          (t.distanceKm.equals(-1.0)), 
+          (t.distanceKm.equals(-1.0)),
     );
 
-    double addedCalories = newSteps * 0.04;
-
-    if (autoWalk == null) {
-      autoWalk = Walk(
+    double totalCalories = newSteps * 0.04;
+    
+    if (autoWalks.isEmpty) {
+      // Create new record
+      var autoWalk = Walk(
         userId: userId,
         steps: newSteps,
         distanceKm: -1.0,
-        calories: addedCalories,
-        createdAt: startOfDay, // Use start of day for identification
+        calories: totalCalories,
+        createdAt: startOfDay,
       );
       await Walk.db.insertRow(session, autoWalk);
       
-      if (addedCalories > 0) {
-        await _updateDailyLog(session, userId, 0, addedCalories, date);
+      if (totalCalories > 0) {
+        await _updateDailyLog(session, userId, 0, totalCalories, date);
       }
     } else {
-      // Calculate delta to update DailyLog accurately
-      double calorieDelta = addedCalories - autoWalk.calories;
-      
-      autoWalk.steps = newSteps;
-      autoWalk.calories = addedCalories;
-      await Walk.db.updateRow(session, autoWalk);
+      // Calculate current total calories from ALL existing automatic records for this day
+      double existingTotalCalories = autoWalks.fold(0.0, (sum, w) => sum + w.calories);
+      double calorieDelta = totalCalories - existingTotalCalories;
+
+      // Update the first record and delete others (cleanup)
+      var primary = autoWalks.first;
+      primary.steps = newSteps;
+      primary.calories = totalCalories;
+      await Walk.db.updateRow(session, primary);
+
+      if (autoWalks.length > 1) {
+        for (int i = 1; i < autoWalks.length; i++) {
+          await Walk.db.deleteRow(session, autoWalks[i]);
+        }
+      }
 
       if (calorieDelta != 0) {
         await _updateDailyLog(session, userId, 0, calorieDelta, date);
@@ -72,7 +83,7 @@ class WalkEndpoint extends Endpoint {
     var startOfDay = DateTime(date.year, date.month, date.day);
     var endOfDay = startOfDay.add(const Duration(days: 1));
 
-    return await Walk.db.find(
+    var walks = await Walk.db.find(
       session,
       where: (t) =>
           t.userId.equals(userId) &
@@ -81,6 +92,27 @@ class WalkEndpoint extends Endpoint {
       orderBy: (t) => t.createdAt,
       orderDescending: true,
     );
+
+    // Merge automatic steps (distanceKm == -1.0) into one entry for UI
+    var manualWalks = walks.where((w) => w.distanceKm != -1.0).toList();
+    var autoWalks = walks.where((w) => w.distanceKm == -1.0).toList();
+
+    if (autoWalks.isEmpty) return manualWalks;
+
+    // Use the one with most steps as primary, or merge if they look different
+    var combinedAuto = autoWalks.first;
+    if (autoWalks.length > 1) {
+      // If the values are identical (duplicate bug), just use one. 
+      // If they are different, we might have a timezone overlap issue.
+      // But for UI, showing the MAX steps is usually what user expects for "Automatic" today.
+      int maxSteps = autoWalks.fold(0, (max, w) => w.steps > max ? w.steps : max);
+      double maxCal = maxSteps * 0.04;
+
+      combinedAuto.steps = maxSteps;
+      combinedAuto.calories = maxCal;
+    }
+
+    return [combinedAuto, ...manualWalks];
   }
 
   Future<List<Walk>> getWalkHistory(
